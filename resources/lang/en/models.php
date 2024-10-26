@@ -10,5 +10,10 @@ return [
     | The array must contain the model names and their translations. (e.g User => 'user')
     |
     */
-	'User'  =>  'User',
+	'File'            =>  'File',
+	'FileActionsLog'  =>  'File Actions Log',
+	'FileBackup'      =>  'File Backup',
+	'Group'           =>  'Group',
+	'GroupUser'       =>  'Group User',
+	'User'            =>  'User',
 ];

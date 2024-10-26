@@ -174,6 +174,7 @@ return [
 		'current_reserver_id'  =>  '',
 		'publisher_id'         =>  '',
 		'group_id'             =>  '',
+		'is_added'             =>  '',
 		'file_id'              =>  '',
 		'user_id'              =>  '',
 		'action'               =>  '',
@@ -183,6 +184,7 @@ return [
 		'group_name'           =>  '',
 		'group_type'           =>  '',
 		'is_owner'             =>  '',
+		'is_accepted'          =>  '',
 	],
 
 ];

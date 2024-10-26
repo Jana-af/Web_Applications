@@ -177,6 +177,7 @@ return [
 		'current_reserver_id'  =>  'Current Reserver Id',
 		'publisher_id'         =>  'Publisher Id',
 		'group_id'             =>  'Group Id',
+		'is_added'             =>  'Is Added',
 		'file_id'              =>  'File Id',
 		'user_id'              =>  'User Id',
 		'action'               =>  'Action',
@@ -186,6 +187,7 @@ return [
 		'group_name'           =>  'Group Name',
 		'group_type'           =>  'Group Type',
 		'is_owner'             =>  'Is Owner',
+		'is_accepted'          =>  'Is Accepted',
 	],
 
 ];
