@@ -16,7 +16,7 @@ class File extends GenericModel
 		'current_reserver_id',
 		'publisher_id',
 		'group_id',
-		'is_added',
+		'is_accepted',
     ];
 
     /**

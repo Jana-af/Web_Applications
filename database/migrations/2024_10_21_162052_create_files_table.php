@@ -21,7 +21,7 @@ return new class extends Migration
             $table->unsignedBigInteger('current_reserver_id')->nullable();
             $table->unsignedBigInteger('publisher_id');
             $table->foreignId('group_id')->cascadeOnDelete();
-            $table->integer('is_added')->default(0);
+            $table->integer('is_accepted')->default(0);
             $table->timestamps();
             $table->foreign('group_id')->references('id')->on('groups')->onDelete('cascade');
        });
