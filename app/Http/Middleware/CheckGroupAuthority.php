@@ -2,12 +2,15 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\GroupUserService;
 use Closure;
+use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Auth;
 
-class SetLocale
+class CheckGroupAuthority
 {
+    public function __construct(private GroupUserService $groupUserService) {}
     /**
      * Handle an incoming request.
      *
@@ -17,10 +20,11 @@ class SetLocale
      */
     public function handle(Request $request, Closure $next)
     {
-        $locale = $request->header('Accept-Language', 'en');
-
-        App::setLocale($locale);
-
+        if (isset($request->group_id)) {
+            if (!$this->groupUserService->checkIfAuthUserOwnTheGroup(Auth::id(), $request->group_id)) {
+                throw new Exception(__('messages.userDoesNotHavePermissionOnGroup'), 401);
+            }
+        }
         return $next($request);
     }
 }

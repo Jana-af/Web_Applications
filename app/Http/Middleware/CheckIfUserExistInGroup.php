@@ -2,12 +2,14 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\GroupUserService;
 use Closure;
+use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
 
-class SetLocale
+class CheckIfUserExistInGroup
 {
+    public function __construct(private GroupUserService $groupUserService) {}
     /**
      * Handle an incoming request.
      *
@@ -17,10 +19,11 @@ class SetLocale
      */
     public function handle(Request $request, Closure $next)
     {
-        $locale = $request->header('Accept-Language', 'en');
-
-        App::setLocale($locale);
-
+        if (isset($request->group_id) && isset($request->user_id)) {
+            if ($this->groupUserService->checkUserInGroup($request->user_id, $request->group_id)) {
+                throw new Exception(__('messages.userAlreadyInvitedToGroup'), 401);
+            }
+        }
         return $next($request);
     }
 }
