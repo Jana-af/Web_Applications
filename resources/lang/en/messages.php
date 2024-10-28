@@ -25,4 +25,8 @@ return [
     //General errors
     'routeNotFound'                  => 'Route not found',
 
+
+    'invitationWasSentSuccessfully' => 'Invitation was sent successfully',
+    'userDoesNotHavePermissionOnGroup' => 'You do not have permissions on this group',
+    'userAlreadyInvitedToGroup'  => 'Already invited'
 ];

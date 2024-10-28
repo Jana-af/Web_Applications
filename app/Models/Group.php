@@ -17,7 +17,7 @@ class Group extends GenericModel
 		'group_name',
 		'group_type',
     ];
-    
+
     /**
      * Get all files for the group
      *
@@ -27,7 +27,7 @@ class Group extends GenericModel
     {
         return $this->hasMany(File::class, 'group_id', 'id');
     }
-    
+
     /**
      * Get all fileActionsLogs for the group
      *
@@ -37,7 +37,7 @@ class Group extends GenericModel
     {
         return $this->hasMany(FileActionsLog::class, 'to_group', 'id');
     }
-    
+
     /**
      * Get all groupUsers for the group
      *
@@ -46,5 +46,9 @@ class Group extends GenericModel
     public function groupUsers(): HasMany
     {
         return $this->hasMany(GroupUser::class, 'group_id', 'id');
+    }
+
+    public function users(){
+        return $this->belongsToMany(User::class);
     }
 }

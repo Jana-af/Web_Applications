@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-
-class GroupUser extends GenericModel
+class GroupUser extends Pivot
 {
     protected $table = 'group_user';
 
@@ -14,7 +14,7 @@ class GroupUser extends GenericModel
 		'group_id',
 		'is_owner',
 		'is_accepted',
-    ];
+	];
 
     /**
      * Get the user that owns the groupUser
@@ -36,3 +36,4 @@ class GroupUser extends GenericModel
         return $this->belongsTo(Group::class, 'group_id', 'id');
     }
 }
+

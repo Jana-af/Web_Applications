@@ -40,9 +40,24 @@ Route::group([
 
 Route::group([
     'prefix' => '/users',
-    'controller' => UserController::class,
     // 'middleware' => ''
 ], function () {
+
+    Route::group([
+        'controller' => UserController::class,
+        // 'middleware' => ''
+    ], function () {
+
+    });
+
+    Route::group([
+        'prefix' => '/groups',
+        'controller' => GroupController::class,
+        // 'middleware' => ''
+    ], function () {
+        Route::get('', 'getMyGroups');
+    });
+
 });
 
 Route::group([
@@ -69,8 +84,30 @@ Route::group([
 
 Route::group([
     'prefix' => '/groups',
-    'controller' => GroupController::class,
+    // 'middleware' => ''
+], function () {
+
+    Route::group([
+        'controller' => UserController::class,
+        'prefix' => '/users',
+        // 'middleware' => ''
+    ], function () {
+        Route::post('/invite', 'inviteUserToGroup');
+    });
+
+    Route::group([
+        'controller' => GroupController::class,
+        // 'middleware' => ''
+    ], function () {
+        Route::post('/store', 'store');
+    });
+
+});
+
+
+Route::group([
+    'prefix' => '/groupUsers',
+    'controller' => GroupUserController::class,
     // 'middleware' => ''
 ], function () {
 });
-

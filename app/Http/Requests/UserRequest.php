@@ -14,4 +14,11 @@ class UserRequest extends GenericRequest
         $method = request()->route()->getActionMethod();
         return $this->{$method . 'Validator'}();
     }
+
+    private function inviteUserToGroupValidator(){
+        return [
+            'user_id' => 'required|integer|exists:users,id',
+            'group_id' => 'required|integer|exists:groups,id'
+        ];
+    }
 }

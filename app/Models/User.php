@@ -74,5 +74,16 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(GroupUser::class, 'user_id', 'id');
     }
+
+    public function groups(){
+        return $this->belongsToMany(Group::class)->withPivot([
+            'is_owner',
+            'is_accepted'
+        ]);
+    }
+
+    public function scopeSearch($query, $filter){
+        
+    }
 }
 

@@ -14,4 +14,12 @@ class GroupRequest extends GenericRequest
         $method = request()->route()->getActionMethod();
         return $this->{$method . 'Validator'}();
     }
+
+    private function storeValidator()
+    {
+        return [
+            'group_name'         => 'required|string|max:255',
+            'group_type'         => 'required|string|max:50|in:PRIVATE,SHARED'
+        ];
+    }
 }

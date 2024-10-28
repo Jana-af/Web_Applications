@@ -20,6 +20,6 @@ class GroupUserFactory extends Factory
 			'group_id'     =>  Group::all()->pluck('id')->random(),
 			'is_owner'     =>  $this->faker->numberBetween(-128, 127),
 			'is_accepted'  =>  $this->faker->numberBetween(-2147483648, 2147483647),
-        ];
+		];
     }
 }

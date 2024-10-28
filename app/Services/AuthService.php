@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\GroupUser;
 use Exception;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -44,7 +45,14 @@ class AuthService
 
         DB::beginTransaction();
 
-        User::create($validatedData);
+        $user = User::create($validatedData);
+
+        GroupUser::create([
+            'user_id' => $user->id,
+            'group_id' => 1,
+            'is_owner' => 0,
+            'is_accepted' => 1
+        ]);
 
         DB::commit();
 

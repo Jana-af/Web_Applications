@@ -25,4 +25,10 @@ return [
     //General errors
     'routeNotFound'                  => 'الرابط غير موجود',
 
+
+
+    'invitationWasSentSuccessfully' => 'تم إرسال الدعوة بنجاح',
+    'userDoesNotHavePermissionOnGroup' => 'لا تملك صلاحيات على هذه المجموعة',
+    'userAlreadyInvitedToGroup' => 'تمت دعوته مسبقاً'
+
 ];
