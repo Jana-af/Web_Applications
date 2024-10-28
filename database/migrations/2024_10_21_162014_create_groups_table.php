@@ -23,8 +23,8 @@ return new class extends Migration
         DB::table('groups')->insert([
             [
                 'id' => 1,
-                'group_name' => 'public',
-                'group_type' => 'public',
+                'group_name' => 'Public',
+                'group_type' => 'PUBLIC',
             ],
         ]);
     }
