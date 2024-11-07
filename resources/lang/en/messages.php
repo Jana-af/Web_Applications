@@ -24,9 +24,24 @@ return [
 
     //General errors
     'routeNotFound'                  => 'Route not found',
+    'FileNotFound'                  => 'File not found',
 
 
     'invitationWasSentSuccessfully' => 'Invitation was sent successfully',
     'userDoesNotHavePermissionOnGroup' => 'You do not have permissions on this group',
-    'userAlreadyInvitedToGroup'  => 'Already invited'
+    'userAlreadyInvitedToGroup'  => 'Already invited',
+    'invitationRejectedSuccessfully' => 'Invitation rejected successfully',
+    'invitationAcceptedSuccessfully' => 'Invitation accepted successfully',
+    'invitationCancelledSuccessfully' => 'Invitation cancelled successfully',
+
+
+    'requestAcceptedSuccessfully' => 'Request accepted successfully',
+    'requestRejectedSuccessfully' => 'Request rejected successfully',
+    'checkInSuccessfully' => 'File checked in successfully',
+    'bulkCheckInSuccessfully' => 'Files checked in successfully',
+    'checkOutSuccessfully' => 'File checked out successfully',
+    'bulkCheckOutSuccessfully' => 'Files checked out successfully',
+    'checkInFailed' => 'The file is currently reserved',
+    'bulkCheckInFailed' => 'One of the files is currently reserved',
+    'fileDownloadedSuccessfully' => 'File downloaded successfully'
 ];

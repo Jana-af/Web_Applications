@@ -18,37 +18,26 @@ class Group extends GenericModel
 		'group_type',
     ];
 
-    /**
-     * Get all files for the group
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
+
     public function files(): HasMany
     {
         return $this->hasMany(File::class, 'group_id', 'id');
     }
 
-    /**
-     * Get all fileActionsLogs for the group
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
     public function fileActionsLogs(): HasMany
     {
         return $this->hasMany(FileActionsLog::class, 'to_group', 'id');
     }
 
-    /**
-     * Get all groupUsers for the group
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
     public function groupUsers(): HasMany
     {
         return $this->hasMany(GroupUser::class, 'group_id', 'id');
     }
 
     public function users(){
-        return $this->belongsToMany(User::class);
+        return $this->belongsToMany(User::class)->withPivot([
+            'is_owner',
+            'is_accepted'
+        ]);;
     }
 }

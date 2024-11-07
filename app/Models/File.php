@@ -28,4 +28,9 @@ class File extends GenericModel
     {
         return $this->belongsTo(Group::class, 'group_id', 'id');
     }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'publisher_id', 'id');
+    }
 }

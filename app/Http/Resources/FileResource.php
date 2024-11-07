@@ -2,6 +2,8 @@
 
 namespace App\Http\Resources;
 
+use Illuminate\Support\Facades\URL;
+
 class FileResource extends GenericResource
 {
     /**
@@ -15,12 +17,12 @@ class FileResource extends GenericResource
         return [
 			'id'                   =>  $this->id,
 			'file_name'            =>  $this->file_name,
-			'file_url'             =>  $this->file_url,
+			'file_url'             =>  URL::asset('') . $this->file_url,
 			'status'               =>  $this->status,
-			'current_reserver_id'  =>  $this->current_reserver_id,
-			'publisher_id'         =>  $this->publisher_id,
+			'current_reserver_id'  =>  $this->current_reserver_id, //ToDo
+			'publisher'            =>  $this->user->name,
 			'group_id'             =>  $this->group_id,
-			'is_added'             =>  $this->is_added,
+			'is_accepted'          =>  $this->is_accepted,
 			'created_at'           =>  $this->created_at,
         ];
     }

@@ -19,7 +19,7 @@ class CheckIfUserExistInGroup
      */
     public function handle(Request $request, Closure $next)
     {
-        if (isset($request->group_id) && isset($request->user_id)) {
+       if (isset($request->group_id) && isset($request->user_id)) {
             if ($this->groupUserService->checkUserInGroup($request->user_id, $request->group_id)) {
                 throw new Exception(__('messages.userAlreadyInvitedToGroup'), 401);
             }
