@@ -35,6 +35,9 @@ class AuthService
 
     public function register($validatedData)
     {
+        if(User::where('username',$validatedData['username'])->first() != null){
+            throw new Exception('Username already exists' , 400);
+        }
         $attemptedData = [
             'username'    => $validatedData['username'],
             'password'         => $validatedData['password']
