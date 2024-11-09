@@ -29,7 +29,7 @@ class RouteServiceProvider extends ServiceProvider
         $this->configureRateLimiting();
 
         $this->routes(function () {
-            Route::middleware(['api', 'set.locale'])
+            Route::middleware(['api', 'set.locale' , 'cors'])
                 ->prefix('api')
                 ->group(base_path('routes/api.php'));
 

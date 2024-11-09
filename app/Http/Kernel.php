@@ -67,5 +67,6 @@ class Kernel extends HttpKernel
         'set.locale' => \App\Http\Middleware\SetLocale::class,
         'check.group.authority' => \App\Http\Middleware\CheckGroupAuthority::class,
         'check.user.in.group' => \App\Http\Middleware\CheckIfUserExistInGroup::class,
+        'cors' => \App\Http\Middleware\Cors::class,
     ];
 }
