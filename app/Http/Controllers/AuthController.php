@@ -22,11 +22,8 @@ class AuthController extends ApiController
         $validatedData = $request->validated();
         $token = $this->service->login($validatedData);
 
-        return $this->successResponse(
-            $this->toResource(Auth::user(), UserResource::class),
-            __('auth.userSuccessfullyLoggedIn'),
-            200,
-            $token
+        return $this->successResponse($token,
+            __('auth.userSuccessfullyLoggedIn')
         );
     }
 
