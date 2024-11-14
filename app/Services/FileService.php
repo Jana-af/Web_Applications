@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\File;
 use App\Models\Group;
+use App\Models\User;
 use App\Traits\FileTrait;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -32,11 +33,28 @@ class FileService extends GenericService
         if($this->groupUserService->checkIfAuthUserOwnTheGroup($validatedData['publisher_id'] , $validatedData['group_id'])){
             $validatedData['is_accepted'] = 1;
         }
-        $model = File::create($validatedData);
+        File::create($validatedData);
 
         DB::commit();
 
         //ToDo
+    }
+
+    public function getFileRequests(){
+
+        /**
+         * @var User $user
+         */
+        $user = Auth::user();
+        $ownedGroupIds = $user->groups()
+                            ->wherePivot('is_owner',1)
+                            ->select('groups.id')
+                            ->pluck('id')
+                            ->toArray();
+
+        $fileRequests = File::whereIn('group_id',$ownedGroupIds)->whereIsAccepted(0)->get();
+
+        return $fileRequests;
     }
 
     public function acceptOrRejectRequest($validatedData){
@@ -64,6 +82,10 @@ class FileService extends GenericService
     public function checkIn($validatedData){                                      //ToDo
         $files = File::whereIn('id',$validatedData['file_ids'])->whereIsAccepted(1)->get();
 
+        if($files->isEmpty()){
+            throw new \Exception(__('messages.FileNotFound'), 404);
+        }
+
         if (count($files) > 1) {
             $bulk = 1;
             $key = 'messages.bulkCheckInFailed';
@@ -90,7 +112,11 @@ class FileService extends GenericService
     }
 
     public function checkOut($validatedData){
-        $files = File::whereIn('id',$validatedData['file_ids'])->get();
+        $files = File::whereIn('id',$validatedData['file_ids'])->whereStatus('RESERVED')->get();
+
+        if($files->isEmpty()){
+            throw new \Exception(__('messages.FileNotFound'), 404);
+        }
 
         if (count($files) > 1) {
             $bulk = 1;
@@ -132,7 +158,5 @@ class FileService extends GenericService
         $filePath = $file->file_url;
 
         return response()->download($filePath);
-
-        // return Storage::download($filePath, $file->file_name);
     }
 }

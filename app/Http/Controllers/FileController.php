@@ -29,6 +29,16 @@ class FileController extends GenericController
         parent::__construct(new FileRequest(), new FileResource([]), new FileService(new GroupUserService(new GroupUser())));
     }
 
+    public function getFileRequests(){
+
+        $fileRequests = $this->fileService->getFileRequests();
+
+        return $this->successResponse(
+            $this->toResource($fileRequests, $this->resource ),
+            __('messages.dataFetchedSuccessfully')
+        );
+    }
+
     public function acceptOrRejectRequest(FileRequest $request){
         $validatedData = $request->validated();
 
@@ -90,12 +100,8 @@ class FileController extends GenericController
 
     public function downloadFile($modelId){
 
-        return $file = $this->fileService->downloadFile($modelId);
+        return $this->fileService->downloadFile($modelId);
 
-        // return $this->successResponse(
-        //     $this->toResource($file, '' ),
-        //     __('messages.fileDownloadedSuccessfully')
-        // );
     }
 
 }

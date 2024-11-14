@@ -22,7 +22,7 @@ class AuthService
 
         $attemptedData = [
             'username'     => $user->username,
-            'password'          => $validatedData['password']
+            'password'     => $validatedData['password']
         ];
 
         if (!$token = Auth::attempt($attemptedData)) {
@@ -40,7 +40,7 @@ class AuthService
         }
         $attemptedData = [
             'username'    => $validatedData['username'],
-            'password'         => $validatedData['password']
+            'password'    => $validatedData['password']
         ];
 
         $validatedData['role']          = 'USER';

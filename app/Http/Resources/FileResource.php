@@ -21,7 +21,7 @@ class FileResource extends GenericResource
 			'status'               =>  $this->status,
 			'current_reserver_id'  =>  $this->current_reserver_id, //ToDo
 			'publisher'            =>  $this->user->name,
-			'group_id'             =>  $this->group_id,
+			'group_id'             =>  $this->group_id,         //ToDo
 			'is_accepted'          =>  $this->is_accepted,
 			'created_at'           =>  $this->created_at,
         ];

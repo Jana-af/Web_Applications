@@ -67,6 +67,7 @@ Route::group([
     'controller' => FileController::class,
     // 'middleware' => ''
 ], function () {
+    Route::get('/get-all-requests', 'getFileRequests');
     Route::post('/store', 'store');
     Route::get('/download/{id}', 'downloadFile');
     Route::get('/get-by-group','getFilesInGroup');
