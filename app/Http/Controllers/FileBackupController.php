@@ -15,7 +15,24 @@ class FileBackupController extends GenericController
     public function __construct(FileBackupService $fileBackupService)
     {
         $this->fileBackupService = $fileBackupService;
-        
+
+
+        $this->middleware(
+            [
+                'check.file.access:findById'
+            ]
+        )->only(['getFileVersions']);
+
         parent::__construct(new FileBackupRequest(), new FileBackupResource([]), new FileBackupService(new FileBackup()));
+    }
+
+    public function getFileVersions($fileId)
+    {
+        $fileVersions = $this->fileBackupService->getFileVersions($fileId);
+
+        return $this->successResponse(
+            $this->toResource($fileVersions, $this->resource),
+            __('messages.dataFetchedSuccessfully')
+        );
     }
 }

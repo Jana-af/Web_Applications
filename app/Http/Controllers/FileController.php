@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\FileRequest;
 use App\Http\Resources\FileResource;
+use App\Models\FileBackup;
+use App\Services\FileBackupService;
 use App\Services\FileService;
 use App\Models\File;
 use App\Models\GroupUser;
@@ -36,7 +38,7 @@ class FileController extends GenericController
         )->only(['getFileRequests']);
 
 
-        parent::__construct(new FileRequest(), new FileResource([]), new FileService(new GroupUserService(new GroupUser())));
+        parent::__construct(new FileRequest(), new FileResource([]), new FileService(new GroupUserService(new GroupUser()), new FileBackupService(new FileBackup())));
     }
 
     public function getFileRequests(FileRequest $fileRequest)

@@ -13,10 +13,13 @@ class FileBackupResource extends GenericResource
     public function toArray($request)
     {
         return [
-			'id'          =>  $this->id,
-			'file_id'     =>  $this->file_id,
-			'file_url'    =>  $this->file_url,
-			'created_at'  =>  $this->created_at,
+            'id'            =>  $this->id,
+            'file_id'       =>  $this->file_id,
+            'file_url'      =>  $this->file_url,
+            'created_at'    =>  $this->created_at,
+            'version'       => $this->version,
+            'modifier_id'   => new UserResource($this->modifier),
+            'version_date'  => $this->version_date
         ];
     }
 }

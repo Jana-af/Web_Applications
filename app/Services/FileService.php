@@ -16,7 +16,7 @@ class FileService extends GenericService
 {
     use FileTrait;
 
-    public function __construct(private GroupUserService $groupUserService)
+    public function __construct(private GroupUserService $groupUserService, private FileBackupService $fileBackupService)
     {
         parent::__construct(new File());
     }
@@ -189,15 +189,24 @@ class FileService extends GenericService
 
         $file = $this->findById($modelId);
 
+        $fileBackUpData = [
+            'file_id'       => $modelId,
+            'file_url'      => $file->file_url,
+            'version' => $this->fileBackupService->getLatestVersionNumber($modelId) + 1,
+            'modifier_id' => Auth::id(),
+            'version_date' => $file->updated_at != null ? $file->updated_at : $file->created_at,
+        ];
+
         $groupName = Group::whereId($file->group_id)->first()->group_name;
 
         $validatedData = $this->uploadFileLogic($validatedData, $groupName);
 
         $file->update($validatedData);
 
+        $this->fileBackupService->store($fileBackUpData);
+
         DB::commit();
 
         return $file;
     }
-
 }
