@@ -47,9 +47,9 @@ Route::group([
         'controller' => UserController::class,
         // 'middleware' => ''
     ], function () {
-        Route::get('', 'getAll');
-        Route::get('/user-invites' , 'getMyInvites');
-        Route::put('/action-on-invite','acceptOrRejectOrCancelInvite');
+        Route::get('', 'getAllUsers');
+        Route::get('/user-invites', 'getMyInvites');
+        Route::put('/action-on-invite', 'acceptOrRejectOrCancelInvite');
     });
 
     Route::group([
@@ -59,7 +59,6 @@ Route::group([
     ], function () {
         Route::get('', 'getMyGroups');
     });
-
 });
 
 Route::group([
@@ -70,11 +69,12 @@ Route::group([
     Route::get('/get-all-requests', 'getFileRequests');
     Route::post('/store', 'store');
     Route::get('/download/{id}', 'downloadFile');
-    Route::get('/get-by-group','getFilesInGroup');
+    Route::get('/get-by-group', 'getFilesInGroup');
     Route::get('/{id}', 'findById');
     Route::put('/action-on-files', 'acceptOrRejectRequest');
-    Route::put('/check-out' , 'checkOut');
-    Route::put('/check-in' , 'checkIn');
+    Route::put('/check-out', 'checkOut');
+    Route::put('/check-in', 'checkIn');
+    Route::post('/update/{id}', 'update');
     Route::delete('/{id}', 'delete');
 });
 
@@ -90,8 +90,7 @@ Route::group([
     'prefix' => '/file-backups',
     'controller' => FileBackupController::class,
     // 'middleware' => ''
-], function () {
-});
+], function () {});
 
 Route::group([
     'prefix' => '/groups',
@@ -104,7 +103,7 @@ Route::group([
         // 'middleware' => ''
     ], function () {
         Route::post('/invite', 'inviteUserToGroup');
-        Route::get('','getUsersInGroup');
+        Route::get('', 'getUsersInGroup');
     });
 
     Route::group([
@@ -113,6 +112,4 @@ Route::group([
     ], function () {
         Route::post('/store', 'store');
     });
-
 });
-

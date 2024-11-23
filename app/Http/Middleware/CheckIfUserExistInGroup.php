@@ -6,6 +6,7 @@ use App\Services\GroupUserService;
 use Closure;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CheckIfUserExistInGroup
 {
@@ -19,9 +20,10 @@ class CheckIfUserExistInGroup
      */
     public function handle(Request $request, Closure $next)
     {
-       if (isset($request->group_id) && isset($request->user_id)) {
-            if ($this->groupUserService->checkUserInGroup($request->user_id, $request->group_id)) {
-                throw new Exception(__('messages.userAlreadyInvitedToGroup'), 401);
+       if (isset($request->group_id) ) {
+        $userId = isset($request->user_id) ? $request->user_id : Auth::id();
+            if (!$this->groupUserService->checkUserInGroup($userId, $request->group_id)) {
+                throw new Exception(__('messages.userDoesNotHavePermissionOnGroup'), 401);
             }
         }
         return $next($request);
