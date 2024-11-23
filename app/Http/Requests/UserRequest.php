@@ -15,29 +15,41 @@ class UserRequest extends GenericRequest
         return $this->{$method . 'Validator'}();
     }
 
-    private function inviteUserToGroupValidator(){
+    private function inviteUserToGroupValidator()
+    {
         return [
             'user_id' => 'required|integer|exists:users,id',
             'group_id' => 'required|integer|exists:groups,id'
         ];
     }
 
-    private function getMyInvitesValidator(){
-        return[
-            'send' => 'required|boolean'
+    private function getMyInvitesValidator()
+    {
+        return [
+            'send' => 'required_without:group_id|boolean',
+            'group_id'  => 'nullable'
         ];
     }
 
-    private function acceptOrRejectOrCancelInviteValidator(){
-        return[
+    private function acceptOrRejectOrCancelInviteValidator()
+    {
+        return [
             'id' => 'required|exists:group_user,id',
             'action' => 'required|string|max:50|in:reject,accept,cancel'
         ];
     }
 
-    private function getUsersInGroupValidator(){
-        return[
+    private function getUsersInGroupValidator()
+    {
+        return [
             'id' => 'required|exists:groups,id',
+        ];
+    }
+
+    private function getAllUsersValidator()
+    {
+        return [
+            'group_id'    => 'nullable|exists:groups,id'
         ];
     }
 }

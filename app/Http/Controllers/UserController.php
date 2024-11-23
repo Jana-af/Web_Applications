@@ -21,10 +21,21 @@ class UserController extends GenericController
 
         $this->middleware([
             'check.group.authority',
-            'check.user.in.group'
+            'check.user.membership'
         ])->only('inviteUserToGroup');
 
-        parent::__construct(new UserRequest(), new UserResource([]), new UserService( new GroupUserService(new GroupUser()))); //ToDo
+        parent::__construct(new UserRequest(), new UserResource([]), new UserService( new GroupUserService(new GroupUser())));
+    }
+
+    public function getAllUsers(UserRequest $userRequest)
+    {
+        $validatedData = $userRequest->validated();
+        $items = $this->userService->getAllUsers($validatedData);
+
+        return $this->successResponse(
+            $this->toResource($items, $this->resource),
+            __('messages.dataFetchedSuccessfully')
+        );
     }
 
     public function inviteUserToGroup(UserRequest $request)
@@ -53,8 +64,8 @@ class UserController extends GenericController
     public function acceptOrRejectOrCancelInvite(UserRequest $request){
         $validatedData = $request->validated();
 
-        $action = $this->userService->acceptOrRejectOrCancelInvite($validatedData);
-        switch($action){
+       $this->userService->acceptOrRejectOrCancelInvite($validatedData);
+        switch($validatedData['action']){
             case'reject' :
                 $key = 'messages.invitationRejectedSuccessfully';
             break;
