@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
+use Illuminate\Support\Facades\Auth;
 
 class File extends GenericModel
 {
@@ -33,4 +33,9 @@ class File extends GenericModel
     {
         return $this->belongsTo(User::class, 'publisher_id', 'id');
     }
+
+    public function reserver(){
+        return $this->belongsTo(User::class, 'current_reserver_id', 'id');
+    }
+
 }

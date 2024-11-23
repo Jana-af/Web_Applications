@@ -18,36 +18,53 @@ class FileRequest extends GenericRequest
     private function storeValidator()
     {
         return [
-            'file_name'         => 'required|string|max:255', //ToDo
             'group_id'         => 'required|Integer|exists:groups,id',
             'file'             => 'required|file',
         ];
     }
 
-    private function acceptOrRejectRequestValidator(){
-        return[
+    private function acceptOrRejectRequestValidator()
+    {
+        return [
             'id' => 'required|exists:files,id',
             'action' => 'required|string|max:50|in:reject,accept'
         ];
     }
 
-    private function getFilesInGroupValidator(){
-        return[
-            'id' => 'required|exists:groups,id',
+    private function getFilesInGroupValidator()
+    {
+        return [
+            'group_id' => 'required|exists:groups,id',
         ];
     }
 
-    private function checkInValidator(){
-        return[
+    private function checkInValidator()
+    {
+        return [
             'file_ids' => 'required|array',
             'file_ids*' => 'required|exists:files,id'
         ];
     }
 
-    private function checkOutValidator(){
-        return[
+    private function checkOutValidator()
+    {
+        return [
             'file_ids' => 'required|array',
             'file_ids*' => 'required|exists:files,id'
+        ];
+    }
+
+    private function getFileRequestsValidator()
+    {
+        return [
+            'group_id'  => 'nullable|integer|exists:groups,id'
+        ];
+    }
+
+    private function updateValidator()
+    {
+        return [
+            'file'             => 'required|file',
         ];
     }
 }
