@@ -17,7 +17,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('file_id')->cascadeOnDelete();
             $table->string('file_url');
+            $table->integer('version');
+            $table->unsignedBigInteger('modifier_id');
+            $table->dateTime('version_date');
             $table->timestamps();
+            $table->foreign('modifier_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

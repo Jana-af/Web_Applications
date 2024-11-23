@@ -63,19 +63,32 @@ Route::group([
 
 Route::group([
     'prefix' => '/files',
-    'controller' => FileController::class,
     // 'middleware' => ''
 ], function () {
-    Route::get('/get-all-requests', 'getFileRequests');
-    Route::post('/store', 'store');
-    Route::get('/download/{id}', 'downloadFile');
-    Route::get('/get-by-group', 'getFilesInGroup');
-    Route::get('/{id}', 'findById');
-    Route::put('/action-on-files', 'acceptOrRejectRequest');
-    Route::put('/check-out', 'checkOut');
-    Route::put('/check-in', 'checkIn');
-    Route::post('/update/{id}', 'update');
-    Route::delete('/{id}', 'delete');
+
+    Route::group([
+        'controller' => FileController::class,
+        // 'middleware' => ''
+    ], function () {
+        Route::get('/get-all-requests', 'getFileRequests');
+        Route::post('/store', 'store');
+        Route::get('/download/{id}', 'downloadFile');
+        Route::get('/get-by-group', 'getFilesInGroup');
+        Route::get('/{id}', 'findById');
+        Route::put('/action-on-files', 'acceptOrRejectRequest');
+        Route::put('/check-out', 'checkOut');
+        Route::put('/check-in', 'checkIn');
+        Route::post('/update/{id}', 'update');
+        Route::delete('/{id}', 'delete');
+    });
+
+    Route::group([
+        'prefix' => '/file-versions',
+        'controller' => FileBackupController::class,
+        // 'middleware' => ''
+    ], function () {
+        Route::get('/{id}', 'getFileVersions');
+    });
 });
 
 Route::group([
