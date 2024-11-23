@@ -45,6 +45,8 @@ return [
     'bulkCheckOutSuccessfully' => 'تم الغاء حجز الملفات بنجاح',
     'checkInFailed' => 'عذراًالملف محجوز مسبقاً',
     'bulkCheckInFailed' => 'عذراً أحد الملفات محجوز مسبقاً',
-    'fileDownloadedSuccessfully' => 'تم تحميل الملف بنجاح'
-
+    'checkOutFailed' => 'لا تملك صلاحيات على أحد الملفات أو أكثر',
+    'fileDownloadedSuccessfully' => 'تم تحميل الملف بنجاح',
+    'bulkCheckInMultiGoup' => 'لا يمكنك حجز اكثر من ملف من مجموعات مختلفة في وقت واحد',
+    'fileModificationFailed' => 'فشل, الرجاء التأكد من رفع ملف بنفس اسم ولاحقة الملف القديم'
 ];

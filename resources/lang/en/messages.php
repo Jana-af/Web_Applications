@@ -43,5 +43,8 @@ return [
     'bulkCheckOutSuccessfully' => 'Files checked out successfully',
     'checkInFailed' => 'The file is currently reserved',
     'bulkCheckInFailed' => 'One of the files is currently reserved',
-    'fileDownloadedSuccessfully' => 'File downloaded successfully'
+    'checkOutFailed' => 'You don\'t have permissions on one file or more',
+    'fileDownloadedSuccessfully' => 'File downloaded successfully',
+    'bulkCheckInMultiGoup' => 'You cannot reserve more than one file from different groups at the same time',
+    'fileModificationFailed'    => 'Failed, please make sure to upload a file with the same name and extension as the old file'
 ];
