@@ -38,7 +38,31 @@ class FileController extends GenericController
         )->only(['getFileRequests']);
 
 
-        parent::__construct(new FileRequest(), new FileResource([]), new FileService(new GroupUserService(new GroupUser()), new FileBackupService(new FileBackup())));
+        parent::__construct(new FileRequest(), new FileResource([]), new FileService());
+    }
+
+    public function store(){
+
+        $validatedData = request()->validate($this->request->rules());
+        $this->fileService->store($validatedData);
+
+        return $this->successResponse(
+            $this->toResource(null, ''),
+            __('messages.dataAddedSuccessfully')
+        );
+
+    }
+
+    public function update($modelId)
+    {
+        $validatedData = request()->validate($this->request->rules());
+
+        $model = $this->fileService->update($validatedData, $modelId);
+
+        return $this->successResponse(
+            $this->toResource($model, $this->resource),
+            __('messages.dataUpdatedSuccessfully')
+        );
     }
 
     public function getFileRequests(FileRequest $fileRequest)
@@ -115,7 +139,13 @@ class FileController extends GenericController
         );
     }
 
-
+    public function getUserCheckedInFiles(){
+        $items = $this->fileService->getUserCheckedInFiles();
+        return $this->successResponse(
+            $this->toResource($items, $this->resource),
+            __('messages.dataFetchedSuccessfully')
+        );
+    }
     public function downloadFile($modelId)
     {
         return $this->fileService->downloadFile($modelId);

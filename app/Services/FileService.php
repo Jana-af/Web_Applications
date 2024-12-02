@@ -2,8 +2,11 @@
 
 namespace App\Services;
 
+use App\AOP\Logger;
 use App\Models\File;
+use App\Models\FileBackup;
 use App\Models\Group;
+use App\Models\GroupUser;
 use App\Models\User;
 use App\Traits\FileTrait;
 use Exception;
@@ -15,9 +18,12 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 class FileService extends GenericService
 {
     use FileTrait;
-
-    public function __construct(private GroupUserService $groupUserService, private FileBackupService $fileBackupService)
+    private GroupUserService $groupUserService;
+    private FileBackupService $fileBackupService;
+    public function __construct()
     {
+        $this->groupUserService = new GroupUserService(new GroupUser());
+        $this->fileBackupService = new FileBackupService(new FileBackup());
         parent::__construct(new File());
     }
 
@@ -28,6 +34,8 @@ class FileService extends GenericService
 
         return $validatedData;
     }
+
+
     public function getFilesGroupId($fileIds)
     {
         $files = File::whereIn('id', $fileIds)
@@ -52,6 +60,7 @@ class FileService extends GenericService
 
         DB::commit();
     }
+
 
     public function getFileRequests($validateData)
     {
@@ -114,6 +123,7 @@ class FileService extends GenericService
         return sizeof($files) == sizeof($fileIds);
     }
 
+
     public function isCheckInOwner($fileIds)
     {
         $files =  File::whereIn('id', $fileIds)
@@ -124,12 +134,13 @@ class FileService extends GenericService
 
         return sizeof($files) == sizeof($fileIds);
     }
+
+    #[Logger]
     public function checkIn($validatedData)
     {
         DB::beginTransaction();
 
         $files = File::lockForUpdate()->whereIn('id', $validatedData['file_ids'])->whereIsAccepted(1)->get();
-
 
         foreach ($files as $file) {
             $file->current_reserver_id = Auth::user()->id;
@@ -141,6 +152,7 @@ class FileService extends GenericService
         return count($files) > 1;
     }
 
+    #[Logger]
     public function checkOut($validatedData)
     {
         $files = File::whereIn('id', $validatedData['file_ids'])->get();
@@ -155,6 +167,15 @@ class FileService extends GenericService
         return count($files) > 1;
     }
 
+    public function getUserCheckedInFiles(){
+        $files =  File::whereIsAccepted(1)
+        ->whereStatus('RESERVED')
+        ->whereCurrentReserverId(Auth::id())
+        ->get();
+
+        return $files;
+    }
+
     public function delete($modelId)
     {
         $model = $this->findById($modelId);
@@ -164,7 +185,7 @@ class FileService extends GenericService
         if ($model->status == 'FREE') {
             $model->delete();
         } else {
-            throw new \Exception(__('messages.checkInFailed'), 403);
+            throw new Exception(__('messages.checkInFailed'), 403);
         }
 
         DB::commit();
@@ -175,7 +196,7 @@ class FileService extends GenericService
         $file = $this->findById($modelId);
 
         if (!$file || $file->is_accepted != 1) {
-            throw new \Exception(__('messages.FileNotFound'), 404);
+            throw new Exception(__('messages.FileNotFound'), 404);
         }
 
         $filePath = $file->file_url;
@@ -183,8 +204,10 @@ class FileService extends GenericService
         return response()->download($filePath);
     }
 
+    #[Logger]
     public function update($validatedData, $modelId)
     {
+
         DB::beginTransaction();
 
         $file = $this->findById($modelId);
@@ -201,8 +224,8 @@ class FileService extends GenericService
 
         $validatedData = $this->uploadFileLogic($validatedData, $groupName);
 
-        $file->update($validatedData);
 
+        $file->update($validatedData);
         $this->fileBackupService->store($fileBackUpData);
 
         DB::commit();

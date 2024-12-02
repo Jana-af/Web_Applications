@@ -15,6 +15,8 @@ class FileActionsLog extends GenericModel
 		'file_id',
 		'user_id',
 		'action',
+        'status',
+        'exception',
 		'to_group',
 		'old_file_name',
 		'new_file_name',

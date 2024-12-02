@@ -22,4 +22,11 @@ class GroupRequest extends GenericRequest
             'group_type'         => 'required|string|max:50|in:PRIVATE,SHARED'
         ];
     }
+
+    private function getMyGroupsValidator()
+    {
+        return [
+            'is_owner'         => 'nullable|boolean',
+        ];
+    }
 }

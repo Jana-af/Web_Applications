@@ -19,9 +19,22 @@ class GroupController extends GenericController
         parent::__construct(new GroupRequest(), new GroupResource([]), new GroupService(new Group()));
     }
 
+    public function store(){
+
+        $validatedData = request()->validate($this->request->rules());
+        $this->groupService->store($validatedData);
+
+        return $this->successResponse(
+            $this->toResource(null, ''),
+            __('messages.dataAddedSuccessfully')
+        );
+
+    }
+
     public function getMyGroups()
     {
-         $items = $this->groupService->getMyGroups();
+        $validatedData = request()->validate($this->request->rules());
+         $items = $this->groupService->getMyGroups($validatedData);
 
         return $this->successResponse(
             $this->toResource($items, $this->resource),
