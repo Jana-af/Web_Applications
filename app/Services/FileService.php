@@ -145,6 +145,7 @@ class FileService extends GenericService
         foreach ($files as $file) {
             $file->current_reserver_id = Auth::user()->id;
             $file->status = 'RESERVED';
+            $file->check_in_time = now();
             $file->save();
         }
         DB::commit();
@@ -165,6 +166,29 @@ class FileService extends GenericService
         }
         DB::commit();
         return count($files) > 1;
+    }
+
+    public function autoCheckOut()
+    {
+        $timeoutMinutes = 60;
+        $timeoutLimit = now()->subMinutes($timeoutMinutes);
+
+        $files = File::where('status', 'RESERVED')
+            ->where('check_in_time', '<=', $timeoutLimit)
+            ->get();
+
+        DB::beginTransaction();
+
+        foreach ($files as $file) {
+            $file->current_reserver_id = null;
+            $file->status = 'FREE';
+            $file->check_in_time = null;
+            $file->save();
+        }
+
+        DB::commit();
+
+        return count($files);
     }
 
     public function getUserCheckedInFiles(){

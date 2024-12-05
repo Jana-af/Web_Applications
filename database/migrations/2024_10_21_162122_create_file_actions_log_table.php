@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -17,7 +18,9 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('file_id')->cascadeOnDelete();
             $table->unsignedBigInteger('user_id')->cascadeOnDelete();
-            $table->enum('action', ['UPLOAD', 'UPDATE', 'DELETE', 'MOVE', 'COPY', 'RENAME', 'CHECK_IN', 'CHECK_OUT']);
+            $table->enum('action', ['UPLOAD', 'UPDATE', 'DELETE', 'MOVE', 'COPY', 'RENAME', 'CHECKIN', 'CHECKOUT']);
+            $table->enum('status', ['STARTING', 'FAILED','SUCCESS']);
+            $table->string('exception')->nullable();
             $table->unsignedBigInteger('to_group')->nullable();
             $table->string('old_file_name')->nullable();
             $table->string('new_file_name')->nullable();

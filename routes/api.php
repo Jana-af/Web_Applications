@@ -71,13 +71,14 @@ Route::group([
         // 'middleware' => ''
     ], function () {
         Route::get('/get-all-requests', 'getFileRequests');
+        Route::get('/user-checked-in', 'getUserCheckedInFiles');
         Route::post('/store', 'store');
         Route::get('/download/{id}', 'downloadFile');
         Route::get('/get-by-group', 'getFilesInGroup');
         Route::get('/{id}', 'findById');
         Route::put('/action-on-files', 'acceptOrRejectRequest');
-        Route::put('/check-out', 'checkOut');
-        Route::put('/check-in', 'checkIn');
+        Route::post('/check-out', 'checkOut');
+        Route::post('/check-in', 'checkIn');
         Route::post('/update/{id}', 'update');
         Route::delete('/{id}', 'delete');
     });

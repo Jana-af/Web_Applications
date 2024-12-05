@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('file_name');
             $table->string('file_url');
             $table->enum('status', ['FREE', 'RESERVED'])->default('FREE');
+            $table->timestamp('check_in_time')->nullable();
             $table->unsignedBigInteger('current_reserver_id')->nullable();
             $table->unsignedBigInteger('publisher_id');
             $table->foreignId('group_id')->cascadeOnDelete();
