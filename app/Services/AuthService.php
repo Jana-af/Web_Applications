@@ -2,11 +2,11 @@
 
 namespace App\Services;
 
+use App\Annotations\Transactional;
 use App\Models\GroupUser;
 use Exception;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class AuthService
@@ -32,7 +32,7 @@ class AuthService
         return $token;
     }
 
-
+    #[Transactional]
     public function register($validatedData)
     {
         $attemptedData = [
@@ -43,8 +43,6 @@ class AuthService
         $validatedData['role']          = 'USER';
         $validatedData['password']      = Hash::make($validatedData['password']);
 
-        DB::beginTransaction();
-
         $user = User::create($validatedData);
 
         GroupUser::create([
@@ -53,8 +51,6 @@ class AuthService
             'is_owner' => 0,
             'is_accepted' => 1
         ]);
-
-        DB::commit();
 
         return $this->login($attemptedData);
     }

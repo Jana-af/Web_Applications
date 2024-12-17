@@ -1,5 +1,5 @@
 <?php
-namespace App\AOP;
+namespace App\AOP\Interceptors;
 
 use Exception;
 use Ray\Aop\MethodInvocation;

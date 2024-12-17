@@ -2,7 +2,8 @@
 
 namespace App\Services;
 
-use App\AOP\Logger;
+use App\Annotations\Logger;
+use App\Annotations\Transactional;
 use App\Models\File;
 use App\Models\FileBackup;
 use App\Models\Group;
@@ -12,8 +13,6 @@ use App\Traits\FileTrait;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\JsonResponse;
 
 class FileService extends GenericService
 {
@@ -44,9 +43,9 @@ class FileService extends GenericService
         return sizeof($groupIds) > 1 ? false : $groupIds;
     }
 
+    #[Transactional]
     public function store($validatedData)
     {
-        DB::beginTransaction();
 
         $groupName = Group::whereId($validatedData['group_id'])->first()->group_name;
         $validatedData['publisher_id'] = Auth::user()->id;
@@ -57,8 +56,6 @@ class FileService extends GenericService
             $validatedData['is_accepted'] = 1;
         }
         File::create($validatedData);
-
-        DB::commit();
     }
 
 
@@ -86,6 +83,7 @@ class FileService extends GenericService
         return $fileRequests;
     }
 
+    #[Transactional]
     public function acceptOrRejectRequest($validatedData)
     {
 
@@ -140,7 +138,10 @@ class FileService extends GenericService
     {
         DB::beginTransaction();
 
-        $files = File::lockForUpdate()->whereIn('id', $validatedData['file_ids'])->whereIsAccepted(1)->get();
+        $files = File::whereIn('id', $validatedData['file_ids'])
+                    ->where('is_accepted', 1)
+                    ->lockForUpdate()
+                    ->get();
 
         foreach ($files as $file) {
             $file->current_reserver_id = Auth::user()->id;
@@ -148,26 +149,27 @@ class FileService extends GenericService
             $file->check_in_time = now();
             $file->save();
         }
-        DB::commit();
 
-        return count($files) > 1;
+        DB::commit();
+        return count($files) > 0;
     }
 
     #[Logger]
+    #[Transactional]
     public function checkOut($validatedData)
     {
         $files = File::whereIn('id', $validatedData['file_ids'])->get();
 
-        DB::beginTransaction();
         foreach ($files as $file) {
             $file->current_reserver_id = null;
             $file->status = 'FREE';
             $file->save();
         }
-        DB::commit();
+
         return count($files) > 1;
     }
 
+    #[Transactional]
     public function autoCheckOut()
     {
         $timeoutMinutes = 60;
@@ -177,7 +179,6 @@ class FileService extends GenericService
             ->where('check_in_time', '<=', $timeoutLimit)
             ->get();
 
-        DB::beginTransaction();
 
         foreach ($files as $file) {
             $file->current_reserver_id = null;
@@ -185,8 +186,6 @@ class FileService extends GenericService
             $file->check_in_time = null;
             $file->save();
         }
-
-        DB::commit();
 
         return count($files);
     }
@@ -200,19 +199,16 @@ class FileService extends GenericService
         return $files;
     }
 
+    #[Transactional]
     public function delete($modelId)
     {
         $model = $this->findById($modelId);
-
-        DB::beginTransaction();
 
         if ($model->status == 'FREE') {
             $model->delete();
         } else {
             throw new Exception(__('messages.checkInFailed'), 403);
         }
-
-        DB::commit();
     }
 
     public function downloadFile($modelId)
@@ -229,11 +225,9 @@ class FileService extends GenericService
     }
 
     #[Logger]
+    #[Transactional]
     public function update($validatedData, $modelId)
     {
-
-        DB::beginTransaction();
-
         $file = $this->findById($modelId);
 
         $fileBackUpData = [
@@ -248,11 +242,8 @@ class FileService extends GenericService
 
         $validatedData = $this->uploadFileLogic($validatedData, $groupName);
 
-
         $file->update($validatedData);
         $this->fileBackupService->store($fileBackUpData);
-
-        DB::commit();
 
         return $file;
     }

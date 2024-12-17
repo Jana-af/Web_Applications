@@ -1,5 +1,5 @@
 <?php
-namespace App\AOP;
+namespace App\Annotations;
 
 use Attribute;
 

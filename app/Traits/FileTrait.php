@@ -3,7 +3,15 @@
 namespace App\Traits;
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use Rap2hpoutre\FastExcel\FastExcel;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
+use PhpOffice\PhpSpreadsheet\Writer\Pdf\Dompdf as DompdfWriter;
 
 trait FileTrait
 {
@@ -31,6 +39,114 @@ trait FileTrait
         $request->merge(['uploadedFiles' => array_merge($request->input('uploadedFiles', []), [$filePath])]);
 
         return $filePath;
+    }
+
+    public static function generateExcelFile($collection, $repository, $fileName): string
+    {
+        $repository = 'storage' . $repository;
+        if (!File::exists($repository)) {
+            File::makeDirectory($repository, 0777, true);
+        }
+
+        $filePath = $repository . Carbon::now()->format('Y_m_d_u') . '_' . $fileName;
+
+        $fastExcel = new FastExcel($collection);
+        $fastExcel->export(public_path($filePath));
+
+        $spreadsheet = IOFactory::load(public_path($filePath));
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $headerRange = 'A1:' . $sheet->getHighestColumn() . '1';
+        $sheet->getStyle($headerRange)
+            ->getFont()
+            ->setBold(true)
+            ->getColor()
+            ->setRGB('FFFFFF');
+        $sheet->getStyle($headerRange)
+            ->getFill()
+            ->setFillType(Fill::FILL_SOLID)
+            ->getStartColor()
+            ->setRGB('0000FF');
+        $sheet->getStyle($headerRange)
+            ->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+
+        $sheet->getStyle($headerRange)
+            ->getBorders()
+            ->getAllBorders()
+            ->setBorderStyle(Border::BORDER_THIN);
+
+        $dataRange = 'A2:' . $sheet->getHighestColumn() . $sheet->getHighestRow();
+        $sheet->getStyle($dataRange)
+            ->getFont()
+            ->setSize(12);
+        $sheet->getStyle($dataRange)
+            ->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+
+        $sheet->getStyle($dataRange)
+            ->getBorders()
+            ->getAllBorders()
+            ->setBorderStyle(Border::BORDER_THIN);
+
+            foreach ($sheet->getColumnIterator() as $column) {
+            $columnIndex = $column->getColumnIndex();
+
+            // Disable auto-sizing and set a fixed width
+            $sheet->getColumnDimension($columnIndex)->setAutoSize(false);
+            $sheet->getColumnDimension($columnIndex)->setWidth(20); // Adjust the value to make it larger than text width
+        }
+
+
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $writer->save(public_path($filePath));
+
+        return $filePath;
+    }
+
+    public static function convertExcelToPdf(string $excelFilePath): string
+    {
+        $outputPdfPath = str_replace('.xlsx', '.pdf', $excelFilePath);
+
+        $spreadsheet = IOFactory::load($excelFilePath);
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $pageSetup = $sheet->getPageSetup();
+        $pageSetup->setPaperSize(PageSetup::PAPERSIZE_A4);
+        $pageSetup->setOrientation(PageSetup::ORIENTATION_PORTRAIT);
+        $pageSetup->setFitToWidth(1);
+        $pageSetup->setFitToHeight(1);
+
+        $sheet->getPageMargins()->setTop(0);
+        $sheet->getPageMargins()->setBottom(0);
+        $sheet->getPageMargins()->setLeft(0);
+        $sheet->getPageMargins()->setRight(0);
+
+        foreach ($sheet->getColumnIterator() as $column) {
+            $sheet->getColumnDimension($column->getColumnIndex())->setWidth(30.5);
+        }
+        foreach ($sheet->getRowIterator() as $row) {
+            $sheet->getRowDimension($row->getRowIndex())->setRowHeight(25);
+        }
+
+        foreach ($sheet->getColumnIterator() as $column) {
+            $columnIndex = $column->getColumnIndex();
+
+            $sheet->getStyle($columnIndex . '1:' . $columnIndex . $sheet->getHighestRow())
+                ->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+                ->setVertical(Alignment::VERTICAL_CENTER);
+        }
+
+        $pdfWriter = new DompdfWriter($spreadsheet);
+        $pdfWriter->setPaperSize(PageSetup::PAPERSIZE_A4);
+        $pdfWriter->setOrientation(PageSetup::ORIENTATION_PORTRAIT);
+
+        $pdfWriter->save($outputPdfPath);
+
+        return $outputPdfPath;
     }
 
     /**

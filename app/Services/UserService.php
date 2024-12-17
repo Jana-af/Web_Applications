@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Annotations\Transactional;
 use App\Models\Group;
 use App\Models\GroupUser;
 use App\Models\User;
@@ -10,8 +11,11 @@ use Illuminate\Support\Facades\Auth;
 
 class UserService extends GenericService
 {
-    public function __construct(private GroupUserService $groupUserService)
+    private GroupUserService $groupUserService;
+
+    public function __construct()
     {
+        $this->groupUserService = new GroupUserService(new GroupUser());
         parent::__construct(new User());
     }
 
@@ -23,6 +27,7 @@ class UserService extends GenericService
         }
         return User::whereNotIn('id', $userIds)->get();
     }
+    #[Transactional]
     public function inviteUserToGroup($validatedData)
     {
         GroupUser::create($validatedData);
@@ -39,6 +44,7 @@ class UserService extends GenericService
         }
     }
 
+    #[Transactional]
     public function acceptOrRejectOrCancelInvite($validatedData)
     {
 

@@ -3,12 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\FileBackupRequest;
+use App\Http\Resources\FileActionsLogResource;
 use App\Http\Resources\FileBackupResource;
+use App\Models\FileActionsLog;
 use App\Services\FileBackupService;
 use App\Models\FileBackup;
+use App\Traits\FileTrait;
 
 class FileBackupController extends GenericController
 {
+   
     private FileBackupService $fileBackupService;
 
 
@@ -28,7 +32,7 @@ class FileBackupController extends GenericController
 
     public function getFileVersions($fileId)
     {
-        $fileVersions = $this->fileBackupService->getFileVersions($fileId);
+       $fileVersions = $this->fileBackupService->getFileVersions($fileId);
 
         return $this->successResponse(
             $this->toResource($fileVersions, $this->resource),

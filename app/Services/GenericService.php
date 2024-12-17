@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
+use App\Annotations\Transactional;
 use Exception;
 use App\Models\GenericModel;
-use Illuminate\Support\Facades\DB;
 
 class GenericService
 {
@@ -50,13 +50,10 @@ class GenericService
      * @param array $validatedData The data to be validated and stored.
      * @return Model The newly created model instance.
      */
+    #[Transactional]
     public function store($validatedData)
     {
-        DB::beginTransaction();
-
         $model = $this->model::create($validatedData);
-
-        DB::commit();
 
         return $model;
     }
@@ -67,15 +64,12 @@ class GenericService
      * @param array $validatedData The data to be validated and stored.
      * @return Collection A collection of newly created model instances.
      */
+    #[Transactional]
     public function bulkStore($validatedData)
     {
-        DB::beginTransaction();
-
         $items = collect($validatedData['list'])->map(function ($record) {
             return $this->model::create($record);
         });
-
-        DB::commit();
 
         return $items;
     }
@@ -87,15 +81,12 @@ class GenericService
      * @param int $modelId The ID of the record to update.
      * @return Model The updated model instance.
      */
+    #[Transactional]
     public function update($validatedData, $modelId)
     {
         $model = $this->findById($modelId);
 
-        DB::beginTransaction();
-
         $model->update($validatedData);
-
-        DB::commit();
 
         return $model;
     }
@@ -105,15 +96,12 @@ class GenericService
      *
      * @param int $modelId The ID of the record to delete.
      */
+    #[Transactional]
     public function delete($modelId)
     {
         $model = $this->findById($modelId);
 
-        DB::beginTransaction();
-
         $model->delete();
-
-        DB::commit();
     }
 
     /**
@@ -121,12 +109,9 @@ class GenericService
      *
      * @param array $validatedData The validated data containing the list of IDs to delete.
      */
+    #[Transactional]
     public function bulkDelete($validatedData)
     {
-        DB::beginTransaction();
-
         $this->model::whereIn('id', $validatedData['ids'])->delete();
-
-        DB::commit();
     }
 }

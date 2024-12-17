@@ -12,15 +12,25 @@ class FileActionsLogResource extends GenericResource
      */
     public function toArray($request)
     {
+        $method = request()->route()->getActionMethod();
+        return $this->{$method . 'Resource'}();
+    }
+
+    public function getByFileIdResource(){
         return [
-			'id'             =>  $this->id,
-			'file_id'        =>  $this->file_id,
-			'user_id'        =>  $this->user_id,
-			'action'         =>  $this->action,
-			'to_group'       =>  $this->to_group,
-			'old_file_name'  =>  $this->old_file_name,
-			'new_file_name'  =>  $this->new_file_name,
-			'created_at'     =>  $this->created_at,
-		];
+            'id'             =>  $this->id,
+            'user'           =>  $this->user ? new UserResource($this->user) : null,
+            'action'         =>  $this->action,
+            'created_at'     =>  $this->created_at,
+        ];
+    }
+
+    public function getByUserIdResource(){
+        return [
+            'id'             =>  $this->id,
+            'file'           =>  $this->file ? new FileResource($this->file) : null,
+            'action'         =>  $this->action,
+            'created_at'     =>  $this->created_at,
+        ];
     }
 }

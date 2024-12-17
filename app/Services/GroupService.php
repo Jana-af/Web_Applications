@@ -2,12 +2,13 @@
 
 namespace App\Services;
 
-use App\AOP\Logger;
+
+use App\Annotations\Logger;
+use App\Annotations\Transactional;
 use App\Models\Group;
 use App\Models\GroupUser;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class GroupService extends GenericService
 {
@@ -17,10 +18,9 @@ class GroupService extends GenericService
     }
 
     #[Logger]
+    #[Transactional]
     public function store($validatedData)
     {
-        DB::beginTransaction();
-
         $model = Group::create($validatedData);
 
         GroupUser::create([
@@ -29,9 +29,6 @@ class GroupService extends GenericService
             'is_owner' => 1,
             'is_accepted' => 1
         ]);
-
-
-        DB::commit();
     }
 
     public function getMyGroups($validatedData)

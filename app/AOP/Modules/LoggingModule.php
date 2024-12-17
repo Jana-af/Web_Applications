@@ -1,7 +1,8 @@
 <?php
 
-namespace App\AOP;
+namespace App\AOP\Modules;
 
+use App\AOP\Interceptors\LoggerInterceptor;
 use Ray\Di\AbstractModule;
 
 class LoggingModule extends AbstractModule
@@ -11,7 +12,7 @@ class LoggingModule extends AbstractModule
     {
         $this->bindInterceptor(
             $this->matcher->any(),
-            $this->matcher->annotatedWith('App\\AOP\\Logger'),
+            $this->matcher->annotatedWith('App\\Annotations\\Logger'),
             [LoggerInterceptor::class]
         );
     }

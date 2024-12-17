@@ -7,6 +7,7 @@ use App\Http\Controllers\FileBackupController;
 use App\Http\Controllers\FileActionsLogController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\UserController;
+use App\Models\FileActionsLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -90,6 +91,17 @@ Route::group([
     ], function () {
         Route::get('/{id}', 'getFileVersions');
     });
+
+    Route::group([
+        'prefix' => '/{id}/file-actions-log',
+        'controller' => FileActionsLogController::class,
+        // 'middleware' => ''
+    ], function () {
+        Route::get('/by-file-id', 'getByFileId');
+        Route::get('/by-user-id', 'getByUserId');
+        Route::get('/report-by-file-id', 'getExcelReportByFileId');
+        Route::get('/report-by-user-id', 'getExcelReportByUserId');
+    });
 });
 
 Route::group([
@@ -127,3 +139,5 @@ Route::group([
         Route::post('/store', 'store');
     });
 });
+
+

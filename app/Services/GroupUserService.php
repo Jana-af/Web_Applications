@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\Auth;
 
 class GroupUserService extends GenericService
 {
+
+    public function __construct(){
+        parent::__construct(new GroupUser());
+    }
     public function checkIfAuthUserOwnTheGroup($user_id, $group_id)
     {
         return GroupUser::whereGroupId($group_id)
