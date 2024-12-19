@@ -19,7 +19,7 @@ class FileActionsLogService extends GenericService
         return FileActionsLog::whereFileId($fileId)->orderByDesc('created_at')->get();
     }
 
-    public function getExcelReportByFileId($fileId){
+    public function getExcelReportByFileId($validatedData, $fileId){
 
         $list = FileActionsLog::whereFileId($fileId)->orderByDesc('created_at')->get();
 
@@ -41,14 +41,16 @@ class FileActionsLogService extends GenericService
             fileName: $fileName.'.xlsx'
         );
 
-        // return  url($this->convertExcelToPdf($filePath));
+        if(isset($validatedData['pdf']) && $validatedData['pdf'] == true){
+            return  url($this->convertExcelToPdf($filePath));
+        }
         return  url($filePath);
    }
     public function getByUserId($userId){
         return FileActionsLog::whereUserId($userId)->orderByDesc('created_at')->get();
     }
 
-    public function getExcelReportByUserId($userId){
+    public function getExcelReportByUserId($validatedData, $userId){
 
         $list =  FileActionsLog::whereUserId($userId)->orderByDesc('created_at')->get();
 
@@ -69,6 +71,9 @@ class FileActionsLogService extends GenericService
             fileName: $userName.'.xlsx'
         );
 
+        if(isset($validatedData['pdf']) && $validatedData['pdf'] == true){
+            return  url($this->convertExcelToPdf($filePath));
+        }
         return  url($filePath);
    }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use Exception;
+
 class FileActionsLogRequest extends GenericRequest
 {
     /**
@@ -12,6 +14,17 @@ class FileActionsLogRequest extends GenericRequest
     public function rules()
     {
         $method = request()->route()->getActionMethod();
-        return $this->{$method . 'Validator'}();
+
+        try {
+            return $this->{$method . 'Validator'}();
+        } catch (Exception $e) {
+            return $this->defaultValidator();
+        }
+    }
+    private function defaultValidator()
+    {
+        return [
+            'pdf'   => 'nullable|boolean'
+        ];
     }
 }

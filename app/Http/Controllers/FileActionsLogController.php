@@ -53,16 +53,18 @@ class FileActionsLogController extends GenericController
         );
     }
 
-    public function getExcelReportByFileId($fileId){
-        $fileLog = $this->fileActionsLogService->getExcelReportByFileId($fileId);
+    public function getExcelReportByFileId(FileActionsLogRequest $request, $fileId){
+        $validatedData = $request->validated();
+        $fileLog = $this->fileActionsLogService->getExcelReportByFileId($validatedData, $fileId);
         return $this->successResponse(
             $fileLog,
             __('messages.dataFetchedSuccessfully')
         );
     }
 
-    public function getExcelReportByUserId($userId){
-        $fileLog = $this->fileActionsLogService->getExcelReportByUserId($userId);
+    public function getExcelReportByUserId(FileActionsLogRequest $request, $userId){
+        $validatedData = $request->validated();
+        $fileLog = $this->fileActionsLogService->getExcelReportByUserId($validatedData, $userId);
 
         return $this->successResponse(
             $fileLog,
