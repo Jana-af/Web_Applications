@@ -14,7 +14,6 @@ class LoggerInterceptor implements MethodInterceptor
     {
         $methodName = $invocation->getMethod()->getName();
         $arguments = $invocation->getArguments();
-        var_dump($methodName);
 
         $validatedData = $arguments[0] ?? [];
         $modelId = isset($arguments[1]) ? [$arguments[1]] : $validatedData['file_ids'];
