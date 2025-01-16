@@ -48,5 +48,7 @@ return [
     'checkOutFailed' => 'لا تملك صلاحيات على أحد الملفات أو أكثر',
     'fileDownloadedSuccessfully' => 'تم تحميل الملف بنجاح',
     'bulkCheckInMultiGoup' => 'لا يمكنك حجز اكثر من ملف من مجموعات مختلفة في وقت واحد',
-    'fileModificationFailed' => 'فشل, الرجاء التأكد من رفع ملف بنفس اسم ولاحقة الملف القديم'
+    'fileModificationFailed' => 'فشل, الرجاء التأكد من رفع ملف بنفس اسم ولاحقة الملف القديم',
+     'compareMoreThanTwoFiles'  => 'لا يمكنك المقارنة بين أكثر من ملفين',
+     'invalidMimeType'      => 'لا يمكنك مقارنة سوى الملفات النصية',
 ];

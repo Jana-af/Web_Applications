@@ -67,4 +67,12 @@ class FileRequest extends GenericRequest
             'file'             => 'required|file',
         ];
     }
+    private function getDiffValidator()
+    {
+        return [
+            'file_id'                => 'required_without:second_file_version_id|nullable|exists:files,id',
+            'first_file_version_id'  => 'required|exists:file_backups,id',
+            'second_file_version_id' => 'required_without:file_id|nullable|exists:file_backups,id',
+        ];
+    }
 }

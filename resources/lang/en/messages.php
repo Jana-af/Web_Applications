@@ -46,5 +46,7 @@ return [
     'checkOutFailed' => 'You don\'t have permissions on one file or more',
     'fileDownloadedSuccessfully' => 'File downloaded successfully',
     'bulkCheckInMultiGoup' => 'You cannot reserve more than one file from different groups at the same time',
-    'fileModificationFailed'    => 'Failed, please make sure to upload a file with the same name and extension as the old file'
+    'fileModificationFailed'    => 'Failed, please make sure to upload a file with the same name and extension as the old file',
+    'compareMoreThanTwoFiles'  => 'You can\'t compare more than two files',
+    'invalidMimeType'      => 'You can only compare text files',
 ];

@@ -68,10 +68,12 @@ Route::group([
     // 'middleware' => ''
 ], function () {
 
+
     Route::group([
         'controller' => FileController::class,
         // 'middleware' => ''
     ], function () {
+        Route::get('/get-diff', 'getDiff');
         Route::get('/get-all-requests', 'getFileRequests');
         Route::get('/user-checked-in', 'getUserCheckedInFiles');
         Route::post('/store', 'store');
@@ -140,28 +142,4 @@ Route::group([
     ], function () {
         Route::post('/store', 'store');
     });
-});
-
-use Illuminate\Support\Facades\File;
-
-Route::get('test', function () {
-
-    // $namespace = "App\Services";
-    // $path = app_path('Services');
-    $namespace = "App\AOP\Modules";
-    $path = app_path('AOP\Modules');
-    return collect(File::allFiles($path))
-        ->map(function ($file) use ($namespace) {
-            $relativePath = $file->getRelativePathname();
-            $class = sprintf(
-                '%s\%s',
-                $namespace,
-                str_replace(['/', '.php'], ['\\', ''], $relativePath)
-            );
-
-            return class_exists($class) ? $class : null;
-        })
-        ->filter()
-        ->values()
-        ->toArray();
 });

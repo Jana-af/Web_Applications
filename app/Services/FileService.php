@@ -12,6 +12,8 @@ use App\Repositories\FileRepository;
 use App\Traits\FileTrait;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use SebastianBergmann\Diff\Differ;
+use SebastianBergmann\Diff\Output\UnifiedDiffOutputBuilder;
 
 class FileService extends GenericService
 {
@@ -51,7 +53,7 @@ class FileService extends GenericService
         $validatedData = $this->uploadFileLogic($validatedData, $groupName);
 
 
-        if ($this->groupUserService->checkIfAuthUserOwnTheGroup($validatedData['group_id'],$validatedData['publisher_id'])) {
+        if ($this->groupUserService->checkIfAuthUserOwnTheGroup($validatedData['group_id'], $validatedData['publisher_id'])) {
             $validatedData['is_accepted'] = 1;
         }
         $this->fileRepository->create($validatedData);
@@ -233,5 +235,50 @@ class FileService extends GenericService
         $this->fileBackupService->store($fileBackUpData);
 
         return $file;
+    }
+
+    public function getDiff($validatedData)
+    {
+        $fromFileUrl = '';
+        $toFileUrl = '';
+
+
+        if (isset($validatedData['file_id'])) {
+            $file = $this->findById($validatedData['file_id']);
+            $toFileUrl = $file->file_url;
+
+            $fileVersion = $this->fileBackupService->findById($validatedData['first_file_version_id']);
+
+            $fromFileUrl = $fileVersion->file_url;
+        }
+
+        if (isset($validatedData['second_file_version_id'])) {
+            $fileVersion1 = $this->fileBackupService->findById($validatedData['first_file_version_id']);
+            $fileVersion2 = $this->fileBackupService->findById($validatedData['second_file_version_id']);
+
+            if ($fileVersion1->version > $fileVersion2->version) {
+                $toFileUrl = $fileVersion1->file_url;
+                $fromFileUrl = $fileVersion2->file_url;
+            } else {
+                $toFileUrl = $fileVersion2->file_url;
+                $fromFileUrl = $fileVersion1->file_url;
+            }
+        }
+
+
+        if (!str_starts_with(mime_content_type($toFileUrl), 'text/') || !str_starts_with(mime_content_type($fromFileUrl), 'text/')) {
+            throw new Exception(__('messages.invalidMimeType'), 400);
+        }
+
+
+        $from = file_get_contents($fromFileUrl);
+        $to = file_get_contents($toFileUrl);
+
+        $outputBuilder = new UnifiedDiffOutputBuilder(
+            "--- Original\n+++ New",
+        );
+
+        $differ = new Differ($outputBuilder);
+        return $differ->diff($from, $to);
     }
 }

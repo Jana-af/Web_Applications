@@ -37,7 +37,8 @@ class FileController extends GenericController
         parent::__construct(new FileRequest(), new FileResource([]), new FileService());
     }
 
-    public function store(){
+    public function store()
+    {
 
         $validatedData = request()->validate($this->request->rules());
         $this->fileService->store($validatedData);
@@ -46,7 +47,6 @@ class FileController extends GenericController
             $this->toResource(null, ''),
             __('messages.dataAddedSuccessfully')
         );
-
     }
 
     public function update($modelId)
@@ -135,7 +135,8 @@ class FileController extends GenericController
         );
     }
 
-    public function getUserCheckedInFiles(){
+    public function getUserCheckedInFiles()
+    {
         $items = $this->fileService->getUserCheckedInFiles();
         return $this->successResponse(
             $this->toResource($items, $this->resource),
@@ -145,5 +146,17 @@ class FileController extends GenericController
     public function downloadFile($modelId)
     {
         return $this->fileService->downloadFile($modelId);
+    }
+
+
+    public function getDiff(FileRequest $request)
+    {
+        $validatedData = $request->validated();
+
+        $diff = $this->fileService->getDiff($validatedData);
+        return $this->successResponse(
+            $diff,
+            __('messages.dataFetchedSuccessfully')
+        );
     }
 }
