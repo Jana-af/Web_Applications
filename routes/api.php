@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\GroupUserController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\FileBackupController;
@@ -90,6 +91,7 @@ Route::group([
         // 'middleware' => ''
     ], function () {
         Route::get('/{id}', 'getFileVersions');
+        Route::get('/download/{id}', 'downloadFile');
     });
 
     Route::group([
@@ -140,4 +142,26 @@ Route::group([
     });
 });
 
+use Illuminate\Support\Facades\File;
 
+Route::get('test', function () {
+
+    // $namespace = "App\Services";
+    // $path = app_path('Services');
+    $namespace = "App\AOP\Modules";
+    $path = app_path('AOP\Modules');
+    return collect(File::allFiles($path))
+        ->map(function ($file) use ($namespace) {
+            $relativePath = $file->getRelativePathname();
+            $class = sprintf(
+                '%s\%s',
+                $namespace,
+                str_replace(['/', '.php'], ['\\', ''], $relativePath)
+            );
+
+            return class_exists($class) ? $class : null;
+        })
+        ->filter()
+        ->values()
+        ->toArray();
+});

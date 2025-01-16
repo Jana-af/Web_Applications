@@ -2,6 +2,7 @@
 
 namespace App\AOP\Modules;
 
+use App\Annotations\Transactional;
 use App\AOP\Interceptors\TransactionalInterceptor;
 use Ray\Di\AbstractModule;
 
@@ -12,7 +13,7 @@ class TransactionalModule extends AbstractModule
     {
         $this->bindInterceptor(
             $this->matcher->any(),
-            $this->matcher->annotatedWith('App\\Annotations\\Transactional'),
+            $this->matcher->annotatedWith(Transactional::class),
             [TransactionalInterceptor::class]
         );
     }

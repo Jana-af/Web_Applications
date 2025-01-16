@@ -36,7 +36,7 @@ class CheckAccessToFile
 
             $exception = false;
             if ($type == 'delete') {
-                if (!$this->groupUserService->checkIfAuthUserOwnTheGroup(Auth::id(), $groupId)) {
+                if (!$this->groupUserService->checkIfAuthUserOwnTheGroup($groupId, Auth::id())) {
                     $exception = true;
                 }
             } elseif ($type == 'findById') {

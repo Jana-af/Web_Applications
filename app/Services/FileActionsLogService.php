@@ -2,30 +2,32 @@
 
 namespace App\Services;
 
-use App\Models\File;
 use App\Models\FileActionsLog;
-use App\Models\User;
+use App\Repositories\FileActionsLogRepository;
 use App\Traits\FileTrait;
 
 class FileActionsLogService extends GenericService
 {
-
     use FileTrait;
+    protected FileActionsLogRepository $fileActionsLogRepository;
+    private UserService $userService;
+    private FileService $fileService;
+
     public function __construct(){
-        parent::__construct(new FileActionsLog());
+        $this->fileActionsLogRepository = new FileActionsLogRepository();
+        parent::__construct(new FileActionsLog(),  $this->fileActionsLogRepository);
     }
 
     public function getByFileId($fileId){
-        return FileActionsLog::whereFileId($fileId)->orderByDesc('created_at')->get();
+        return $this->fileActionsLogRepository->getByFileId($fileId);
     }
 
     public function getExcelReportByFileId($validatedData, $fileId){
 
-        $list = FileActionsLog::whereFileId($fileId)->orderByDesc('created_at')->get();
-
+        $list = $this->fileActionsLogRepository->getByFileId($fileId);
+        $file = $this->fileService->findById($fileId);
         $collection = $list->map(function ($item) {
-            $file = File::find($item->file_id);
-            $user = User::find($item->user_id);
+            $user = $this->userService->findById($item->user_id);
 
             return [
                 'Username' => $user ? $user->name : 'Unknown',
@@ -34,7 +36,7 @@ class FileActionsLogService extends GenericService
             ];
         });
 
-        $fileName = File::find($fileId)?->file_name ?? 'Unknown';
+        $fileName = $file?->file_name ?? 'Unknown';
         $filePath = $this->generateExcelFile(
             $collection,
             '/Reports/',
@@ -47,15 +49,15 @@ class FileActionsLogService extends GenericService
         return  url($filePath);
    }
     public function getByUserId($userId){
-        return FileActionsLog::whereUserId($userId)->orderByDesc('created_at')->get();
+        return $this->fileActionsLogRepository->getByUserId($userId);
     }
 
     public function getExcelReportByUserId($validatedData, $userId){
 
-        $list =  FileActionsLog::whereUserId($userId)->orderByDesc('created_at')->get();
+        $list = $this->fileActionsLogRepository->getByUserId($userId);
 
         $collection = $list->map(function ($item) {
-            $file = File::find($item->file_id);
+            $file = $this->fileService->findById($item->file_id);
 
             return [
                 'File Name' => $file ? $file->file_name : 'Unknown',
@@ -64,7 +66,8 @@ class FileActionsLogService extends GenericService
             ];
         });
 
-        $userName = User::find($userId)?->name ?? 'Unknown';
+        $user = $this->userService->findById($userId);
+        $userName = $user?->name ?? 'Unknown';
         $filePath = $this->generateExcelFile(
             $collection,
             '/Reports/',

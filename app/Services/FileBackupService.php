@@ -3,19 +3,32 @@
 namespace App\Services;
 
 use App\Models\FileBackup;
+use App\Repositories\FileBackupRepository;
 
 class FileBackupService extends GenericService
 {
-    public function __construct(){
-        parent::__construct(new FileBackup());
+    private $fileBackupRepository;
+
+    public function __construct()
+    {
+        $this->fileBackupRepository = new FileBackupRepository();
+        parent::__construct(new FileBackup(), $this->fileBackupRepository );
     }
     public function getLatestVersionNumber($fileId)
     {
-        $latestVersion = FileBackup::whereFileId($fileId)->max('version');
-        return  $latestVersion ?? 0;
+        return $this->fileBackupRepository->getLatestVersionNumber($fileId);
     }
     public function getFileVersions($fileId)
     {
-        return FileBackup::whereFileId($fileId)->get();
+        return $this->fileBackupRepository->getFileVersions($fileId);
+    }
+
+    public function downloadFile($modelId)
+    {
+        $file = $this->fileBackupRepository->findById($modelId);
+
+        $filePath = $file->file_url;
+
+        return response()->download($filePath);
     }
 }

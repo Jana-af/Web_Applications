@@ -24,15 +24,15 @@ class InterceptorModulesProvider extends ServiceProvider
         $services = $this->getClassesInNamespace($this->serviceNamespace, $servicePath);
         $modules = $this->getClassesInNamespace($this->moduleNamespace, $modulePath);
 
-
-        foreach ($modules as $module) {
-            foreach ($services as $service) {
-                $this->app->singleton($service, function () use ($module, $service) {
-                    $module = new $module();
-                    $injector = new Injector($module);
-                    return $injector->getInstance($service);
-                });
-            }
+        foreach ($services as $service) {
+            $this->app->singletonIf($service, function () use ($modules, $service) {
+                $modulesToBind = [];
+                foreach ($modules as $module) {
+                    array_push($modulesToBind,new $module());
+                }
+                $injector = new Injector($modulesToBind);
+                return $injector->getInstance($service);
+            });
         }
     }
 

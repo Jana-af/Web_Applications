@@ -3,54 +3,64 @@
 namespace App\Services;
 
 use App\Models\GroupUser;
+use App\Repositories\GroupUserRepository;
 use Illuminate\Support\Facades\Auth;
 
 class GroupUserService extends GenericService
 {
 
-    public function __construct(){
-        parent::__construct(new GroupUser());
-    }
-    public function checkIfAuthUserOwnTheGroup($user_id, $group_id)
+    private GroupUserRepository $groupUserRepository;
+
+    public function __construct()
     {
-        return GroupUser::whereGroupId($group_id)
-            ->whereUserId($user_id)->whereIsOwner(1)->first() != null;
+        $this->groupUserRepository = new GroupUserRepository();
+        parent::__construct(new GroupUser(), $this->groupUserRepository);
+    }
+    public function checkIfAuthUserOwnTheGroup($groupId, $userId)
+    {
+        return $this->groupUserRepository->findByGroupAndUser($groupId, $userId, 1) != null;
     }
 
-    public function checkUserInGroup($user_id, $group_id)
+    public function checkUserInGroup($userId, $groupId)
     {
-        return GroupUser::whereGroupId($group_id)
-            ->whereUserId($user_id)->where('is_accepted', '!=', -1)->first() != null;
+        return $this->groupUserRepository->findByGroupAndUser($groupId, $userId, null, 1) != null;
     }
 
-    public function getUserIdsInGroup($group_id)
+    public function getUserIdsInGroup($groupId)
     {
-        return GroupUser::whereGroupId($group_id)->pluck('user_id')->toArray();
+        return $this->groupUserRepository->getUserIdsInGroup($groupId);
     }
 
     public function myGroupIds()
     {
-        return GroupUser::whereUserId(Auth::id())->whereIsOwner(1)->pluck('group_id')->toArray();
+        return $this->groupUserRepository->getGroupIdsForUser(Auth::id(), 1);
     }
 
-    public function getSentInvites($group_id = null)
+    public function getSentInvites($groupId = null)
     {
         $myGroups = $this->myGroupIds();
-        $query = null;
-        if ($group_id != null) {
-            if (in_array($group_id, $myGroups))
-                $query = GroupUser::where('group_id', $group_id);
-            else
+
+        if ($groupId !== null) {
+            if (!in_array($groupId, $myGroups)) {
                 return null;
-        } else {
-            $query =  GroupUser::whereIn('group_id', $myGroups);
+            }
+            return $this->groupUserRepository->getInvites([$groupId]);
         }
 
-        return $query->whereIsOwner(0)->whereIsAccepted(0)->get();
+        return $this->groupUserRepository->getInvites($myGroups);
     }
 
     public function getReceivedInvites()
     {
-        return GroupUser::whereUserId(Auth::user()->id)->whereIsAccepted(0)->get();
+        return $this->groupUserRepository->getUserInvites(Auth::id());
+    }
+
+    public function addUserToGroup(int $userId, int $groupId, bool $isOwner, bool $isAccepted): GroupUser
+    {
+        return $this->groupUserRepository->addUserToGroup($userId, $groupId, $isOwner, $isAccepted);
+    }
+    public function updateInvite(GroupUser $invite, array $data)
+    {
+        return $this->groupUserRepository->updateInvite($invite, $data);
     }
 }

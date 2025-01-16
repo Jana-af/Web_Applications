@@ -73,7 +73,7 @@ class UserController extends GenericController
                 $key = 'messages.invitationAcceptedSuccessfully';
             break;
             case'cancel' :
-                $key = 'messages.invitationCacelledSuccessfully';
+                $key = 'messages.invitationCancelledSuccessfully';
             break;
         }
         return $this->successResponse(

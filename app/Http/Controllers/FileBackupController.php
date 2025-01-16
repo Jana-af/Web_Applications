@@ -12,7 +12,7 @@ use App\Traits\FileTrait;
 
 class FileBackupController extends GenericController
 {
-   
+
     private FileBackupService $fileBackupService;
 
 
@@ -38,5 +38,10 @@ class FileBackupController extends GenericController
             $this->toResource($fileVersions, $this->resource),
             __('messages.dataFetchedSuccessfully')
         );
+    }
+
+    public function downloadFile($modelId)
+    {
+        return $this->fileBackupService->downloadFile($modelId);
     }
 }

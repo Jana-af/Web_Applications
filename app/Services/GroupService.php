@@ -6,29 +6,33 @@ namespace App\Services;
 use App\Annotations\Logger;
 use App\Annotations\Transactional;
 use App\Models\Group;
-use App\Models\GroupUser;
 use App\Models\User;
+use App\Repositories\GroupRepository;
 use Illuminate\Support\Facades\Auth;
 
 class GroupService extends GenericService
 {
+    private GroupRepository $groupRepository;
+    private GroupUserService $groupUserService;
+
     public function __construct()
     {
-        parent::__construct(new Group());
+        $this->groupRepository = new GroupRepository();
+        $this->groupUserService = new GroupUserService();
+        parent::__construct(new Group(), $this->groupRepository);
     }
 
-    #[Logger]
     #[Transactional]
     public function store($validatedData)
     {
-        $model = Group::create($validatedData);
+        $group = $this->groupRepository->createGroup($validatedData);
 
-        GroupUser::create([
-            'user_id' => Auth::user()->id,
-            'group_id' => $model->id,
-            'is_owner' => 1,
-            'is_accepted' => 1
-        ]);
+        $this->groupUserService->addUserToGroup(
+            Auth::user()->id,
+            $group->id,
+            true,
+            true
+        );
     }
 
     public function getMyGroups($validatedData)

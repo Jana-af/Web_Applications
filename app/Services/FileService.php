@@ -6,24 +6,27 @@ use App\Annotations\Logger;
 use App\Annotations\Transactional;
 use App\Models\File;
 use App\Models\FileBackup;
-use App\Models\Group;
 use App\Models\GroupUser;
 use App\Models\User;
+use App\Repositories\FileRepository;
 use App\Traits\FileTrait;
 use Exception;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class FileService extends GenericService
 {
     use FileTrait;
     private GroupUserService $groupUserService;
+    private GroupService $groupService;
     private FileBackupService $fileBackupService;
+    private FileRepository $fileRepository;
     public function __construct()
     {
         $this->groupUserService = new GroupUserService(new GroupUser());
         $this->fileBackupService = new FileBackupService(new FileBackup());
-        parent::__construct(new File());
+        $this->fileRepository = new FileRepository();
+        $this->groupService = new GroupService();
+        parent::__construct(new File(), $this->fileRepository);
     }
 
     private function uploadFileLogic($validatedData, $groupName)
@@ -37,31 +40,26 @@ class FileService extends GenericService
 
     public function getFilesGroupId($fileIds)
     {
-        $files = File::whereIn('id', $fileIds)
-            ->whereIsAccepted(1)->pluck('group_id')->toArray();
-        $groupIds = array_unique($files);
-        return sizeof($groupIds) > 1 ? false : $groupIds;
+        return $this->fileRepository->getFilesGroupId($fileIds);
     }
 
     #[Transactional]
     public function store($validatedData)
     {
-
-        $groupName = Group::whereId($validatedData['group_id'])->first()->group_name;
+        $groupName = $this->groupService->findById($validatedData['group_id'])->group_name;
         $validatedData['publisher_id'] = Auth::user()->id;
         $validatedData = $this->uploadFileLogic($validatedData, $groupName);
 
 
-        if ($this->groupUserService->checkIfAuthUserOwnTheGroup($validatedData['publisher_id'], $validatedData['group_id'])) {
+        if ($this->groupUserService->checkIfAuthUserOwnTheGroup($validatedData['group_id'],$validatedData['publisher_id'])) {
             $validatedData['is_accepted'] = 1;
         }
-        File::create($validatedData);
+        $this->fileRepository->create($validatedData);
     }
 
 
     public function getFileRequests($validateData)
     {
-
         /**
          * @var User $user
          */
@@ -77,80 +75,68 @@ class FileService extends GenericService
                 ->toArray();
         }
 
-
-        $fileRequests = File::whereIn('group_id', $ownedGroupIds)->whereIsAccepted(0)->get();
-
-        return $fileRequests;
+        return $this->fileRepository->getFileRequestsByGroupIds($ownedGroupIds);
     }
 
     #[Transactional]
     public function acceptOrRejectRequest($validatedData)
     {
 
-        $model = File::find($validatedData['id']);
+        $model = $this->fileRepository->findById($validatedData['id']);
         if ($model->is_accepted != '0') {
             throw new Exception("Request not found !", 404);
         }
 
         switch ($validatedData['action']) {
             case 'accept':
-                $model->is_accepted = '1';
+                $this->fileRepository->updateFile($model, ['is_accepted' => '1']);
                 break;
             case 'reject':
-                $model->is_accepted = '-1';
+                $this->fileRepository->updateFile($model, ['is_accepted' => '-1']);
                 break;
         }
-
-        $model->save();
 
         return $validatedData['action'];
     }
 
     public function getFilesInGroup($validatedData)
     {
-        return File::whereGroupId($validatedData['group_id'])->whereIsAccepted(1)->get();
+        return $this->fileRepository->getFilesByGroupId($validatedData['group_id']);
     }
 
     public function checkIfFilesFree($fileIds)
     {
-        $files =  File::whereIn('id', $fileIds)
-            ->whereIsAccepted(1)
-            ->whereStatus('FREE')
-            ->get();
-
+        $files =  $this->fileRepository->getFilesInStatus($fileIds, 'FREE', 1);
         return sizeof($files) == sizeof($fileIds);
     }
 
 
     public function isCheckInOwner($fileIds)
     {
-        $files =  File::whereIn('id', $fileIds)
-            ->whereIsAccepted(1)
-            ->whereStatus('RESERVED')
-            ->whereCurrentReserverId(Auth::id())
-            ->get();
-
+        $files = $this->fileRepository->getReservedFilesByUser(Auth::id(), $fileIds);
         return sizeof($files) == sizeof($fileIds);
     }
 
     #[Logger]
+    #[Transactional]
     public function checkIn($validatedData)
     {
-        DB::beginTransaction();
-
-        $files = File::whereIn('id', $validatedData['file_ids'])
-                    ->where('is_accepted', 1)
-                    ->lockForUpdate()
-                    ->get();
+        $files = $this->fileRepository->getByIds($validatedData['file_ids'], 1);
 
         foreach ($files as $file) {
-            $file->current_reserver_id = Auth::user()->id;
-            $file->status = 'RESERVED';
-            $file->check_in_time = now();
-            $file->save();
+            if ($file->status == 'RESERVED') {
+                throw new Exception();
+            }
+            $this->fileRepository->updateFile(
+                $file,
+                [
+                    'current_reserver_id' => Auth::id(),
+                    'status' => 'RESERVED',
+                    'check_in_time' => now()
+                ]
+            );
         }
 
-        DB::commit();
         return count($files) > 0;
     }
 
@@ -158,12 +144,17 @@ class FileService extends GenericService
     #[Transactional]
     public function checkOut($validatedData)
     {
-        $files = File::whereIn('id', $validatedData['file_ids'])->get();
+        $files = $this->fileRepository->getByIds($validatedData['file_ids']);
 
         foreach ($files as $file) {
-            $file->current_reserver_id = null;
-            $file->status = 'FREE';
-            $file->save();
+            $this->fileRepository->updateFile(
+                $file,
+                [
+                    'current_reserver_id' => null,
+                    'status' => 'FREE',
+                    'check_in_time' => null
+                ]
+            );
         }
 
         return count($files) > 1;
@@ -175,37 +166,35 @@ class FileService extends GenericService
         $timeoutMinutes = 60;
         $timeoutLimit = now()->subMinutes($timeoutMinutes);
 
-        $files = File::where('status', 'RESERVED')
-            ->where('check_in_time', '<=', $timeoutLimit)
-            ->get();
+        $files = $this->fileRepository->getAutoCheckoutCandidates('RESERVED', $timeoutLimit);
 
 
         foreach ($files as $file) {
-            $file->current_reserver_id = null;
-            $file->status = 'FREE';
-            $file->check_in_time = null;
-            $file->save();
+            $this->fileRepository->updateFile(
+                $file,
+                [
+                    'current_reserver_id' => null,
+                    'status' => 'FREE',
+                    'check_in_time' => null
+                ]
+            );
         }
 
         return count($files);
     }
 
-    public function getUserCheckedInFiles(){
-        $files =  File::whereIsAccepted(1)
-        ->whereStatus('RESERVED')
-        ->whereCurrentReserverId(Auth::id())
-        ->get();
-
-        return $files;
+    public function getUserCheckedInFiles()
+    {
+        return $this->fileRepository->getUserCheckedInFiles();
     }
 
     #[Transactional]
     public function delete($modelId)
     {
-        $model = $this->findById($modelId);
+        $file = $this->fileRepository->findById($modelId);
 
-        if ($model->status == 'FREE') {
-            $model->delete();
+        if ($file->status == 'FREE') {
+            $this->fileRepository->deleteFile($file);
         } else {
             throw new Exception(__('messages.checkInFailed'), 403);
         }
@@ -213,7 +202,7 @@ class FileService extends GenericService
 
     public function downloadFile($modelId)
     {
-        $file = $this->findById($modelId);
+        $file = $this->fileRepository->findById($modelId);
 
         if (!$file || $file->is_accepted != 1) {
             throw new Exception(__('messages.FileNotFound'), 404);
@@ -228,21 +217,19 @@ class FileService extends GenericService
     #[Transactional]
     public function update($validatedData, $modelId)
     {
-        $file = $this->findById($modelId);
-
+        $file = $this->fileRepository->findById($modelId);
         $fileBackUpData = [
             'file_id'       => $modelId,
-            'file_url'      => $file->file_url,
-            'version' => $this->fileBackupService->getLatestVersionNumber($modelId) + 1,
+            'file_url'        => $file->file_url,
+            'version'       => $this->fileBackupService->getLatestVersionNumber($modelId) + 1,
             'modifier_id' => Auth::id(),
             'version_date' => $file->updated_at != null ? $file->updated_at : $file->created_at,
         ];
 
-        $groupName = Group::whereId($file->group_id)->first()->group_name;
+        $group = $this->groupService->findById($file->group_id);
+        $validatedData = $this->uploadFileLogic($validatedData, $group->group_name);
 
-        $validatedData = $this->uploadFileLogic($validatedData, $groupName);
-
-        $file->update($validatedData);
+        $this->fileRepository->updateFile($file, $validatedData);
         $this->fileBackupService->store($fileBackUpData);
 
         return $file;

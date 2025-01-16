@@ -10,6 +10,7 @@ class TransactionalInterceptor implements MethodInterceptor
 {
     public function invoke(MethodInvocation $invocation)
     {
+        var_dump("methodName");
         try {
             DB::beginTransaction();
 

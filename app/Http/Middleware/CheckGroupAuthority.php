@@ -21,7 +21,7 @@ class CheckGroupAuthority
     public function handle(Request $request, Closure $next)
     {
         if (isset($request->group_id)) {
-            if (!$this->groupUserService->checkIfAuthUserOwnTheGroup(Auth::id(), $request->group_id)) {
+            if (!$this->groupUserService->checkIfAuthUserOwnTheGroup($request->group_id, Auth::id())) {
                 throw new Exception(__('messages.userDoesNotHavePermissionOnGroup'), 401);
             }
         }

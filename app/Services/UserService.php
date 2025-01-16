@@ -3,20 +3,25 @@
 namespace App\Services;
 
 use App\Annotations\Transactional;
-use App\Models\Group;
 use App\Models\GroupUser;
 use App\Models\User;
+use App\Repositories\UserRepository;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 
 class UserService extends GenericService
 {
     private GroupUserService $groupUserService;
+    private GroupService $groupService;
+
+    private UserRepository $userRepository;
 
     public function __construct()
     {
         $this->groupUserService = new GroupUserService(new GroupUser());
-        parent::__construct(new User());
+        $this->userRepository = new UserRepository();
+        $this->groupService = new GroupService();
+        parent::__construct(new User(), $this->userRepository);
     }
 
     public function getAllUsers($validatedData)
@@ -25,12 +30,12 @@ class UserService extends GenericService
         if (isset($validatedData['group_id'])) {
             $userIds = $this->groupUserService->getUserIdsInGroup($validatedData['group_id']);
         }
-        return User::whereNotIn('id', $userIds)->get();
+        return $this->userRepository->getUsersNotIn($userIds);
     }
-    #[Transactional]
+
     public function inviteUserToGroup($validatedData)
     {
-        GroupUser::create($validatedData);
+        $this->groupUserService->store($validatedData);
     }
 
     public function getMyInvites($validatedData)
@@ -47,15 +52,16 @@ class UserService extends GenericService
     #[Transactional]
     public function acceptOrRejectOrCancelInvite($validatedData)
     {
-
-        $invite = GroupUser::whereId($validatedData['id'])->first();
+        /**
+         * @var GroupUser
+         */
+        $invite = $this->groupUserService->findById($validatedData['id']);
 
         if ($validatedData['action'] == 'cancel') {
-            if ($invite->is_accepted != '0' || !$this->groupUserService->checkIfAuthUserOwnTheGroup(Auth::user()->id, $invite->group_id)) {
+            if ($invite->is_accepted != '0' || !$this->groupUserService->checkIfAuthUserOwnTheGroup($invite->group_id, Auth::user()->id)) {
                 throw new \Exception("Invite not found !", 404);
             } else {
-                $invite->is_accepted = -2;
-                $invite->save();
+                $this->groupUserService->updateInvite($invite, ['is_accepted' => -2]);
             }
         } else {
             if ($invite->is_accepted != '0' || $invite->user_id != Auth::user()->id) {
@@ -63,13 +69,11 @@ class UserService extends GenericService
             } else {
                 switch ($validatedData['action']) {
                     case 'accept':
-                        $invite->is_accepted = 1;
-                        $invite->save();
+                        $this->groupUserService->updateInvite($invite, ['is_accepted' => 1]);
                         break;
 
                     case 'reject':
-                        $invite->is_accepted = -1;
-                        $invite->save();
+                        $this->groupUserService->updateInvite($invite, ['is_accepted' => -1]);
                         break;
                 }
             }
@@ -83,6 +87,8 @@ class UserService extends GenericService
         ) {
             throw new Exception(__('messages.userDoesNotHavePermissionOnGroup'), 404);
         }
-        return Group::whereId($validatedData['id'])->first()->users()->wherePivot('is_accepted', 1)->get();
+        $group = $this->groupService->findById($validatedData['id']);
+
+        return $group->users()->wherePivot('is_accepted', 1)->get();
     }
 }

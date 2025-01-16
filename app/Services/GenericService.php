@@ -3,17 +3,19 @@
 namespace App\Services;
 
 use App\Annotations\Transactional;
+use App\Repositories\GenericRepository;
 use Exception;
 use App\Models\GenericModel;
 
 class GenericService
 {
     private GenericModel $model;
+    protected GenericRepository $repository;
 
-
-    public function __construct(GenericModel $model)
+    public function __construct(GenericModel $model, GenericRepository $repository)
     {
         $this->model = $model;
+        $this->repository = $repository;
     }
 
     /**
@@ -23,7 +25,7 @@ class GenericService
      */
     public function getAll()
     {
-        return $this->model::paginate(request()['limit']);
+        return $this->repository->getAll();
     }
 
     /**
@@ -35,13 +37,7 @@ class GenericService
      */
     public function findById($modelId)
     {
-        $model = $this->model::find($modelId);
-
-        if (!$model) {
-            throw new Exception(__('validation.exists', ['attribute' => __('models.' . class_basename($this->model))]), 404);
-        }
-
-        return $model;
+         return $this->repository->findById($modelId);
     }
 
     /**
@@ -53,25 +49,18 @@ class GenericService
     #[Transactional]
     public function store($validatedData)
     {
-        $model = $this->model::create($validatedData);
-
-        return $model;
+        return $this->repository->create($validatedData);
     }
 
     /**
      * Store multiple records in the model.
      *
      * @param array $validatedData The data to be validated and stored.
-     * @return Collection A collection of newly created model instances.
      */
     #[Transactional]
     public function bulkStore($validatedData)
     {
-        $items = collect($validatedData['list'])->map(function ($record) {
-            return $this->model::create($record);
-        });
-
-        return $items;
+        return $this->repository->bulkCreate($validatedData['list']);
     }
 
     /**
@@ -85,10 +74,7 @@ class GenericService
     public function update($validatedData, $modelId)
     {
         $model = $this->findById($modelId);
-
-        $model->update($validatedData);
-
-        return $model;
+        return $this->repository->update($model, $validatedData);
     }
 
     /**
@@ -100,8 +86,7 @@ class GenericService
     public function delete($modelId)
     {
         $model = $this->findById($modelId);
-
-        $model->delete();
+        $this->repository->delete($model);
     }
 
     /**
@@ -109,9 +94,10 @@ class GenericService
      *
      * @param array $validatedData The validated data containing the list of IDs to delete.
      */
+
     #[Transactional]
     public function bulkDelete($validatedData)
     {
-        $this->model::whereIn('id', $validatedData['ids'])->delete();
+        $this->repository->bulkDelete($validatedData['ids']);
     }
 }
