@@ -28,6 +28,11 @@ class GenericService
         return $this->repository->getAll();
     }
 
+    public function getCount()
+    {
+        return $this->repository->getCount();
+    }
+
     /**
      * Retrieve a record by its ID from the model.
      *

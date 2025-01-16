@@ -89,4 +89,9 @@ class FileRepository extends GenericRepository
 
         return $files;
     }
+
+    public function getCount()
+    {
+        return $this->model::whereIsAccepted(1)->count();
+    }
 }

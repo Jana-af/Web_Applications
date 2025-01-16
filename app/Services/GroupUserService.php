@@ -59,6 +59,12 @@ class GroupUserService extends GenericService
     {
         return $this->groupUserRepository->addUserToGroup($userId, $groupId, $isOwner, $isAccepted);
     }
+
+    public function removeUserFromGroup(int $userId, int $groupId): GroupUser
+    {
+        return $this->groupUserRepository->removeUserFromGroup($userId, $groupId);
+    }
+
     public function updateInvite(GroupUser $invite, array $data)
     {
         return $this->groupUserRepository->updateInvite($invite, $data);

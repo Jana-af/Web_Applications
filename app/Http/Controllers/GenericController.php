@@ -40,6 +40,16 @@ class GenericController extends ApiController
         );
     }
 
+    public function getCount()
+    {
+        $items = $this->service->getCount();
+
+        return $this->successResponse(
+            $items,
+            __('messages.dataFetchedSuccessfully')
+        );
+    }
+
     /**
      * Retrieve a resource item by its ID.
      *
@@ -132,7 +142,7 @@ class GenericController extends ApiController
     public function bulkDelete()
     {
         $validatedData = request()->validate($this->request->rules());
-        
+
         $this->service->bulkDelete($validatedData);
 
         return $this->successResponse(

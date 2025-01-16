@@ -52,4 +52,22 @@ class UserRequest extends GenericRequest
             'group_id'    => 'nullable|exists:groups,id'
         ];
     }
+
+    private function storeValidator()
+    {
+        return [
+            'name'           =>  'required|string|max:100',
+            'username'          =>  'required|string|unique:users,username',
+            'password'       =>  'required|string|confirmed|min:6|max:100',
+            'role'       =>  'required|in:ADMIN,USER',
+        ];
+    }
+
+    private function removeUserFromGroupValidator()
+    {
+        return [
+            'user_id' => 'required|integer|exists:users,id',
+            'group_id' => 'required|integer|exists:groups,id'
+        ];
+    }
 }

@@ -21,6 +21,17 @@ class GroupUserRepository extends GenericRepository
         ]);
     }
 
+    public function removeUserFromGroup(int $userId, int $groupId): GroupUser
+    {
+        $groupUser = GroupUser::where('user_id', $userId)
+        ->where('group_id', $groupId)
+        ->whereIsAccepted(1)
+        ->first();
+
+        return $this->update($groupUser, ['is_accepted' => 0]);
+
+    }
+
     public function checkIfUserOwnsGroup(int $userId, int $groupId): bool
     {
         return GroupUser::where('user_id', $userId)

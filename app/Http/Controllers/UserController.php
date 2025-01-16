@@ -92,4 +92,17 @@ class UserController extends GenericController
             __('messages.dataFetchedSuccessfully')
         );
     }
+
+
+    public function removeUserFromGroup(UserRequest $request){
+        $validatedData = $request->validated();
+
+        $this->userService->removeUserFromGroup($validatedData);
+
+        return $this->successResponse(
+            $this->toResource(null, '' ),
+            __('messages.dataUpdatedSuccessfully')
+        );
+    }
+
 }

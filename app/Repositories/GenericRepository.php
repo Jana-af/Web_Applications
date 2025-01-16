@@ -18,6 +18,11 @@ class GenericRepository
         return $this->model::paginate(request()['limit']);
     }
 
+    public function getCount()
+    {
+        return $this->model::count();
+    }
+
     public function findById($id)
     {
         $model = $this->model::find($id);

@@ -91,4 +91,10 @@ class UserService extends GenericService
 
         return $group->users()->wherePivot('is_accepted', 1)->get();
     }
+
+    public function removeUserFromGroup($validatedData)
+    {
+        $this->groupUserService->removeUserFromGroup($validatedData['user_id'],$validatedData['group_id']);
+    }
+
 }

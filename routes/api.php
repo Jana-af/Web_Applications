@@ -50,6 +50,9 @@ Route::group([
         // 'middleware' => ''
     ], function () {
         Route::get('', 'getAllUsers');
+        Route::get('/count', 'getCount');
+        Route::post('', 'store');
+        Route::delete('/{id}', 'delete');
         Route::get('/user-invites', 'getMyInvites');
         Route::put('/action-on-invite', 'acceptOrRejectOrCancelInvite');
     });
@@ -74,6 +77,7 @@ Route::group([
         // 'middleware' => ''
     ], function () {
         Route::get('/get-diff', 'getDiff');
+        Route::get('/count', 'getCount');
         Route::get('/get-all-requests', 'getFileRequests');
         Route::get('/user-checked-in', 'getUserCheckedInFiles');
         Route::post('/store', 'store');
@@ -132,6 +136,7 @@ Route::group([
         'prefix' => '/users',
         // 'middleware' => ''
     ], function () {
+        Route::post('/remove', 'removeUserFromGroup');
         Route::post('/invite', 'inviteUserToGroup');
         Route::get('', 'getUsersInGroup');
     });
@@ -140,6 +145,9 @@ Route::group([
         'controller' => GroupController::class,
         // 'middleware' => ''
     ], function () {
+        Route::get('/', 'getAll');
+        Route::get('/count', 'getCount');
+        Route::delete('/{id}', 'delete');
         Route::post('/store', 'store');
     });
 });
