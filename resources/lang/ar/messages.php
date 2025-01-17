@@ -51,4 +51,5 @@ return [
     'fileModificationFailed' => 'فشل, الرجاء التأكد من رفع ملف بنفس اسم ولاحقة الملف القديم',
      'compareMoreThanTwoFiles'  => 'لا يمكنك المقارنة بين أكثر من ملفين',
      'invalidMimeType'      => 'لا يمكنك مقارنة سوى الملفات النصية',
+     'permissionExcpetion'  =>'لا تملك صلاحيات',
 ];

@@ -74,5 +74,6 @@ class Kernel extends HttpKernel
         'check.in.authority' => \App\Http\Middleware\CheckInAuthority::class,
         'check.file.origin' => \App\Http\Middleware\CheckFileOriginalName::class,
         'cors' => \App\Http\Middleware\Cors::class,
+        'role' => \App\Http\Middleware\CheckRole::class,
     ];
 }

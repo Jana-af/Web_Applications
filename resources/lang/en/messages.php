@@ -49,4 +49,5 @@ return [
     'fileModificationFailed'    => 'Failed, please make sure to upload a file with the same name and extension as the old file',
     'compareMoreThanTwoFiles'  => 'You can\'t compare more than two files',
     'invalidMimeType'      => 'You can only compare text files',
+    'permissionExcpetion'  => 'You don\'t have permessions',
 ];
