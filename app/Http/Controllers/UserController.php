@@ -39,6 +39,16 @@ class UserController extends GenericController
             __('messages.dataFetchedSuccessfully')
         );
     }
+    public function updateDeviceToken(UserRequest $userRequest)
+    {
+        $validatedData = $userRequest->validated();
+        $items = $this->userService->updateDeviceToken($validatedData);
+
+        return $this->successResponse(
+            $this->toResource($items, $this->resource),
+            __('messages.dataFetchedSuccessfully')
+        );
+    }
 
     public function inviteUserToGroup(UserRequest $request)
     {

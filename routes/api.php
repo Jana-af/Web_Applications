@@ -49,6 +49,7 @@ Route::group([
         'controller' => UserController::class,
         // 'middleware' => ''
     ], function () {
+        Route::post('/update-device-token', 'updateDeviceToken');
         Route::get('', 'getAllUsers');
         Route::get('/count', 'getCount');
         Route::post('', 'store');
@@ -151,3 +152,5 @@ Route::group([
         Route::post('/store', 'store');
     });
 });
+
+Route::get('/test', [Controller::class, 'test']);

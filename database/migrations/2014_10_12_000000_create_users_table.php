@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('username')->unique();
             $table->string('password');
             $table->enum('role', ['ADMIN', 'USER'])->default('USER');
+            $table->string('device_token', 1500)->nullable();
             $table->timestamps();
         });
     }

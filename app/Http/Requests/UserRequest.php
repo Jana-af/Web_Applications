@@ -70,4 +70,10 @@ class UserRequest extends GenericRequest
             'group_id' => 'required|integer|exists:groups,id'
         ];
     }
+    private function updateDeviceTokenValidator()
+    {
+        return [
+            'device_token' => 'required|string'
+        ];
+    }
 }

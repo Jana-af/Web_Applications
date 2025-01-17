@@ -4,11 +4,13 @@ namespace App\Services;
 
 use App\Annotations\Logger;
 use App\Annotations\Transactional;
+use App\Http\Resources\GroupResource;
 use App\Models\File;
 use App\Models\FileBackup;
 use App\Models\GroupUser;
 use App\Models\User;
 use App\Repositories\FileRepository;
+use App\ThirdPartyServices\NotificationService;
 use App\Traits\FileTrait;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -48,7 +50,8 @@ class FileService extends GenericService
     #[Transactional]
     public function store($validatedData)
     {
-        $groupName = $this->groupService->findById($validatedData['group_id'])->group_name;
+        $group = $this->groupService->findById($validatedData['group_id']);
+        $groupName = $group->group_name;
         $validatedData['publisher_id'] = Auth::user()->id;
         $validatedData = $this->uploadFileLogic($validatedData, $groupName);
 
@@ -56,7 +59,28 @@ class FileService extends GenericService
         if ($this->groupUserService->checkIfAuthUserOwnTheGroup($validatedData['group_id'], $validatedData['publisher_id'])) {
             $validatedData['is_accepted'] = 1;
         }
-        $this->fileRepository->create($validatedData);
+
+        $deviceToken = $group->users()->wherePivot('is_owner', 1)->first()->device_token;
+
+        try {
+            if ($deviceToken != null && $deviceToken != '') {
+                NotificationService::send(
+                    [$deviceToken],
+                    __('notification.requestToAddFileTitle'),
+                    __(
+                        'notification.requestToAddFileBody',
+                        [
+                            'username' => Auth::user()->name,
+                            'groupName' => $group->group_name
+                        ]
+                    ),
+                    [
+                        'group_id'  => new GroupResource($group)
+                    ]
+                );
+            }
+        } catch (Exception $e) {
+        }
     }
 
 
@@ -88,15 +112,83 @@ class FileService extends GenericService
         if ($model->is_accepted != '0') {
             throw new Exception("Request not found !", 404);
         }
+        $group = $model->group;
+        $deviceToken = $model->user->device_token;
 
-        switch ($validatedData['action']) {
-            case 'accept':
-                $this->fileRepository->updateFile($model, ['is_accepted' => '1']);
-                break;
-            case 'reject':
-                $this->fileRepository->updateFile($model, ['is_accepted' => '-1']);
-                break;
+        if ($validatedData['action'] == 'accept') {
+
+
+
+            $this->fileRepository->updateFile($model, ['is_accepted' => '1']);
+
+            try {
+                if ($deviceToken != null && $deviceToken != '') {
+                    NotificationService::send(
+                        [$deviceToken],
+                        __('notification.acceptFileTitle'),
+                        __(
+                            'notification.acceptFileBody',
+                            [
+                                'filename' => $model->file_name,
+                                'groupName' => $group->group_name
+                            ]
+                        ),
+                        [
+                            'group_id'  => new GroupResource($group)
+                        ]
+                    );
+                }
+                $deviceTokens = array_values(array: array_filter(
+                    $model->group->users->where('id', '!=', $model->publisher_id)->pluck('device_token')->toArray(),
+                    function ($value) {
+                        return $value !== '';
+                    }
+                ));
+
+                if (sizeof($deviceTokens) > 0) {
+                    NotificationService::send(
+                        $deviceTokens,
+                        __('notification.newFileTitle'),
+                        __(
+                            'notification.newFileBody',
+                            [
+                                'username' => $model->user->name,
+                                'filename' => $model->file_name,
+                                'groupName' => $group->group_name
+                            ]
+                        ),
+                        [
+                            'group_id'  => new GroupResource($group)
+                        ]
+                    );
+                }
+            } catch (Exception $e) {
+            }
+        } elseif ($validatedData['action'] == 'reject') {
+            $this->fileRepository->updateFile($model, ['is_accepted' => '-1']);
+
+            try {
+                if ($deviceToken != null && $deviceToken != '') {
+                    NotificationService::send(
+                        [$deviceToken],
+                        __('notification.rejectFileTitle'),
+                        __(
+                            'notification.rejectFileBody',
+                            [
+                                'filename' => $model->file_name,
+                                'groupName' => $group->group_name
+                            ]
+                        ),
+                        [
+                            'group_id'  => new GroupResource($group)
+                        ]
+                    );
+                }
+            } catch (Exception $e) {
+            }
         }
+
+
 
         return $validatedData['action'];
     }
@@ -139,6 +231,35 @@ class FileService extends GenericService
             );
         }
 
+        $group = $files[0]->group;
+        $deviceTokens = array_values(array: array_filter(
+            $group->users->where('id', '!=', Auth::id())->pluck('device_token')->toArray(),
+            function ($value) {
+                return $value !== '';
+            }
+        ));
+
+        try {
+            if (sizeof($deviceTokens) > 0) {
+                NotificationService::send(
+                    $deviceTokens,
+                    __('notification.checkInTitle'),
+                    __(
+                        'notification.checkInBody',
+                        [
+                            'username' => Auth::user()->name,
+                            'fileNames' => implode(', ', $files->pluck('file_name')->toArray()),
+                            'groupName' => $group->group_name
+                        ]
+                    ),
+                    [
+                        'group_id'  => new GroupResource($group)
+                    ]
+                );
+            }
+        } catch (Exception $e) {
+        }
+
         return count($files) > 0;
     }
 
@@ -157,6 +278,35 @@ class FileService extends GenericService
                     'check_in_time' => null
                 ]
             );
+        }
+
+        $group = $files[0]->group;
+        $deviceTokens = array_values(array: array_filter(
+            $group->users->where('id', '!=', Auth::id())->pluck('device_token')->toArray(),
+            function ($value) {
+                return $value !== '';
+            }
+        ));
+
+        try {
+            if (sizeof($deviceTokens) > 0) {
+                NotificationService::send(
+                    $deviceTokens,
+                    __('notification.checkOutTitle'),
+                    __(
+                        'notification.checkOutBody',
+                        [
+                            'username' => Auth::user()->name,
+                            'fileNames' => implode(', ', $files->pluck('file_name')->toArray()),
+                            'groupName' => $group->group_name
+                        ]
+                    ),
+                    [
+                        'group_id'  => new GroupResource($group)
+                    ]
+                );
+            }
+        } catch (Exception $e) {
         }
 
         return count($files) > 1;

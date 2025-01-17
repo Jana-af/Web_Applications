@@ -16,6 +16,7 @@ class UserResource extends GenericResource
 			'id'          =>  $this->id,
 			'name'        =>  $this->name,
 			'username'    =>  $this->username,
+			'device_token'    =>  $this->device_token,
 			'role'        =>  $this->role
         ];
     }

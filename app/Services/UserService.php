@@ -23,6 +23,15 @@ class UserService extends GenericService
         $this->groupService = new GroupService();
         parent::__construct(new User(), $this->userRepository);
     }
+    public function updateDeviceToken($validatedData)
+    {
+        return $this->update(
+            [
+                'device_token' => $validatedData['device_token']
+            ],
+            Auth::id()
+        );
+    }
 
     public function getAllUsers($validatedData)
     {
