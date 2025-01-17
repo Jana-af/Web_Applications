@@ -16,16 +16,13 @@ class FileController extends GenericController
     {
         $this->fileService = $fileService;
 
-        $this->middleware('check.file.access:findById')->only(['findById']);
+        $this->middleware('check.file.access:findById')->only(['findById', 'getDiff', 'store', 'getFilesInGroup']);
         $this->middleware(['check.file.access:findById', 'check.file.status'])->only(['checkIn']);
         $this->middleware(['check.file.access:delete', 'check.file.status'])->only('delete');
         $this->middleware('check.file.access:delete')->only('acceptOrRejectRequest');
-        $this->middleware('check.in.authority')->only(['checkOut', 'downloadFile']);
-        $this->middleware(['check.in.authority', 'check.file.origin'])->only(['update']);
+        $this->middleware('check.in.authority')->only(['checkOut', 'downloadFile', 'update']);
+        $this->middleware('role:ADMIN')->only(['getCount']);
 
-        $this->middleware([
-            'check.user.in.group'
-        ])->only(['store', 'getFilesInGroup']);
 
         $this->middleware(
             [

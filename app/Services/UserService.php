@@ -35,6 +35,9 @@ class UserService extends GenericService
 
     public function inviteUserToGroup($validatedData)
     {
+        if ($this->groupUserService->checkUserIfInvited($validatedData['user_id'], $validatedData['group_id'])) {
+            throw new Exception(__('messages.userAlreadyInvitedToGroup'), 401);
+        }
         $this->groupUserService->store($validatedData);
     }
 
@@ -83,7 +86,7 @@ class UserService extends GenericService
     public function getUsersInGroup($validatedData)
     {
         if (
-            !$this->groupUserService->checkUserInGroup(Auth::id(), $validatedData['id'])
+            !$this->groupUserService->checkUserInGroup(Auth::id(), $validatedData['id']) && Auth::user()->role == 'USER'
         ) {
             throw new Exception(__('messages.userDoesNotHavePermissionOnGroup'), 404);
         }
@@ -94,7 +97,21 @@ class UserService extends GenericService
 
     public function removeUserFromGroup($validatedData)
     {
-        $this->groupUserService->removeUserFromGroup($validatedData['user_id'],$validatedData['group_id']);
+        $this->groupUserService->removeUserFromGroup($validatedData['user_id'], $validatedData['group_id']);
     }
 
+    public function store($validatedData)
+    {
+        $createdUser = $this->repository->create($validatedData);
+        if ($validatedData['role'] == 'ADMIN') {
+            $groupUserData = [
+                'user_id' => $createdUser->id,
+                'group_id' => 1,
+                'is_owner' => 1,
+                'is_accepted' => 1
+            ];
+            $this->groupUserService->store($groupUserData);
+        }
+        return $createdUser;
+    }
 }

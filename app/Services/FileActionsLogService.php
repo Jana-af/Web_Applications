@@ -13,16 +13,22 @@ class FileActionsLogService extends GenericService
     private UserService $userService;
     private FileService $fileService;
 
-    public function __construct(){
+    public function __construct()
+    {
         $this->fileActionsLogRepository = new FileActionsLogRepository();
+        $this->userService = new UserService();
+        $this->fileService = new FileService();
         parent::__construct(new FileActionsLog(),  $this->fileActionsLogRepository);
     }
 
-    public function getByFileId($fileId){
+    public function getByFileId($fileId)
+    {
         return $this->fileActionsLogRepository->getByFileId($fileId);
     }
 
-    public function getExcelReportByFileId($validatedData, $fileId){
+    public function getExcelReportByFileId($validatedData, $fileId)
+    {
+
 
         $list = $this->fileActionsLogRepository->getByFileId($fileId);
         $file = $this->fileService->findById($fileId);
@@ -37,22 +43,29 @@ class FileActionsLogService extends GenericService
         });
 
         $fileName = $file?->file_name ?? 'Unknown';
-        $filePath = $this->generateExcelFile(
-            $collection,
-            '/Reports/',
-            fileName: $fileName.'.xlsx'
-        );
 
-        if(isset($validatedData['pdf']) && $validatedData['pdf'] == true){
-            return  url($this->convertExcelToPdf($filePath));
+        if (sizeof($collection) > 0) {
+            $filePath = $this->generateExcelFile(
+                $collection,
+                '/Reports/',
+                fileName: $fileName . '.xlsx'
+            );
+
+            if (isset($validatedData['pdf']) && $validatedData['pdf'] == true) {
+                return  url($this->convertExcelToPdf($filePath));
+            }
+            return  url($filePath);
+        } else {
+            return null;
         }
-        return  url($filePath);
-   }
-    public function getByUserId($userId){
+    }
+    public function getByUserId($userId)
+    {
         return $this->fileActionsLogRepository->getByUserId($userId);
     }
 
-    public function getExcelReportByUserId($validatedData, $userId){
+    public function getExcelReportByUserId($validatedData, $userId)
+    {
 
         $list = $this->fileActionsLogRepository->getByUserId($userId);
 
@@ -68,15 +81,19 @@ class FileActionsLogService extends GenericService
 
         $user = $this->userService->findById($userId);
         $userName = $user?->name ?? 'Unknown';
-        $filePath = $this->generateExcelFile(
-            $collection,
-            '/Reports/',
-            fileName: $userName.'.xlsx'
-        );
+        if (sizeof($collection) > 0) {
+            $filePath = $this->generateExcelFile(
+                $collection,
+                '/Reports/',
+                fileName: $userName . '.xlsx'
+            );
 
-        if(isset($validatedData['pdf']) && $validatedData['pdf'] == true){
-            return  url($this->convertExcelToPdf($filePath));
+            if (isset($validatedData['pdf']) && $validatedData['pdf'] == true) {
+                return  url($this->convertExcelToPdf($filePath));
+            }
+            return  url($filePath);
+        } else {
+            return null;
         }
-        return  url($filePath);
-   }
+    }
 }

@@ -6,6 +6,7 @@ use App\Services\FileService;
 use Closure;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CheckInAuthority
 {
@@ -23,7 +24,7 @@ class CheckInAuthority
         $fileIds = isset($request->file_ids) ? $request->file_ids : [$request->id];
         $isOwner = $this->fileService->isCheckInOwner($fileIds);
 
-        if (!$isOwner) {
+        if (!$isOwner && Auth::user()->role == 'USER') {
             throw new Exception(__('messages.checkOutFailed'), 401);
         }
 

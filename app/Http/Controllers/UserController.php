@@ -19,9 +19,11 @@ class UserController extends GenericController
     {
         $this->userService = $userService;
 
+        $this->middleware('role:ADMIN')->only(['store', 'getAll', 'getCount', 'removeUserFromGroup']);
+
+
         $this->middleware([
-            'check.group.authority',
-            'check.user.membership'
+            'check.group.authority'
         ])->only('inviteUserToGroup');
 
         parent::__construct(new UserRequest(), new UserResource([]), new UserService( new GroupUserService(new GroupUser())));

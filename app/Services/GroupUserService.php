@@ -26,6 +26,11 @@ class GroupUserService extends GenericService
         return $this->groupUserRepository->findByGroupAndUser($groupId, $userId, null, 1) != null;
     }
 
+    public function checkUserIfInvited($userId, $groupId)
+    {
+        return $this->groupUserRepository->findByGroupAndUser($groupId, $userId, null) != null;
+    }
+
     public function getUserIdsInGroup($groupId)
     {
         return $this->groupUserRepository->getUserIdsInGroup($groupId);

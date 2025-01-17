@@ -25,7 +25,7 @@ class FileBackupController extends GenericController
             [
                 'check.file.access:findById'
             ]
-        )->only(['getFileVersions']);
+        )->only(['getFileVersions', 'downloadFile']);
 
         parent::__construct(new FileBackupRequest(), new FileBackupResource([]), new FileBackupService(new FileBackup()));
     }

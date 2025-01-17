@@ -67,12 +67,9 @@ class Kernel extends HttpKernel
 
         'set.locale' => \App\Http\Middleware\SetLocale::class,
         'check.group.authority' => \App\Http\Middleware\CheckGroupAuthority::class,
-        'check.user.membership' => \App\Http\Middleware\CheckIfUserAlreadyInvited::class,
-        'check.user.in.group' => \App\Http\Middleware\CheckIfUserExistInGroup::class,
         'check.file.access' => \App\Http\Middleware\CheckAccessToFile::class,
         'check.file.status' => \App\Http\Middleware\CheckFileStatus::class,
         'check.in.authority' => \App\Http\Middleware\CheckInAuthority::class,
-        'check.file.origin' => \App\Http\Middleware\CheckFileOriginalName::class,
         'cors' => \App\Http\Middleware\Cors::class,
         'role' => \App\Http\Middleware\CheckRole::class,
     ];

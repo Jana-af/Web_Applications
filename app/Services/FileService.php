@@ -220,6 +220,9 @@ class FileService extends GenericService
     public function update($validatedData, $modelId)
     {
         $file = $this->fileRepository->findById($modelId);
+        if ($file->file_name != $validatedData['file']->getClientOriginalName()) {
+            throw new Exception(__('messages.fileModificationFailed'), 409);
+        }
         $fileBackUpData = [
             'file_id'       => $modelId,
             'file_url'        => $file->file_url,

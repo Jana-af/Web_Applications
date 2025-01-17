@@ -16,6 +16,8 @@ class GroupController extends GenericController
     {
         $this->groupService = $groupService;
 
+        $this->middleware('role:ADMIN', ['getAll', 'getCount', 'delete']);
+
         parent::__construct(new GroupRequest(), new GroupResource([]), new GroupService(new Group()));
     }
 
